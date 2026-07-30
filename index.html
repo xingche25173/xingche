@@ -559,11 +559,21 @@ function initLifeList() {
     let needFix = false;
     presetTexts.forEach(t => {
       if (!existingTexts.includes(t)) {
-        // 找到对应预设并补回
         const presets = getLifeListPresets();
         const preset = presets.find(p => p.text === t);
         if (preset) {
           existing.push({ id: uid(), date: todayStr(), ...preset });
+          needFix = true;
+        }
+      }
+    });
+    // 给已有目标补充每日任务(如果没有的话)
+    const presets = getLifeListPresets();
+    existing.forEach(g => {
+      if (!g.dailyTasks || g.dailyTasks.length === 0) {
+        const preset = presets.find(p => p.text === g.text);
+        if (preset && preset.dailyTasks && preset.dailyTasks.length > 0) {
+          g.dailyTasks = preset.dailyTasks.map(t => ({ ...t, id: uid() }));
           needFix = true;
         }
       }
@@ -574,24 +584,52 @@ function initLifeList() {
     return;
   }
   const presets = getLifeListPresets();
-  // 保持图片原始顺序,进行中的在前,已完成的在后
   const list = presets.map(p => ({ id: uid(), date: todayStr(), ...p }));
   setPageData('lifeList', list);
 }
 function getLifeListPresets() {
   return [
-    { text: '存款 50w', category: '财务', deadline: '2027-01-26', note: '已存 27w', progress: 54, currentValue: '27w', targetValue: '50w', done: false },
-    { text: '月入三万,交社保', category: '事业', deadline: '', note: '', progress: 0, currentValue: '', targetValue: '月入3w', done: false },
-    { text: '培养输出型爱好,雅思 6.5', category: '学习', deadline: '2027-01-26', note: '', progress: 0, currentValue: '', targetValue: '雅思6.5', done: false },
-    { text: '保持在 96 斤', category: '健康', deadline: '2027-01-26', note: '', progress: 0, currentValue: '', targetValue: '96斤', done: false },
-    { text: '情绪稳定', category: '健康', deadline: '', note: '', progress: 0, currentValue: '', targetValue: '', done: false },
-    { text: '晚上 11 点睡觉', category: '健康', deadline: '', note: '', progress: 0, currentValue: '', targetValue: '23:00', done: false },
-    { text: '穿有气质的衣服', category: '形象', deadline: '', note: '', progress: 0, currentValue: '', targetValue: '', done: false },
-    { text: '妆容精致,会画眼妆', category: '形象', deadline: '', note: '', progress: 0, currentValue: '', targetValue: '', done: false },
-    { text: '找个喜欢的人谈恋爱', category: '情感', deadline: '2027-01-26', note: '', progress: 0, currentValue: '', targetValue: '', done: false },
-    { text: '出国玩', category: '体验', deadline: '', note: '✅ 已去了泰国', progress: 100, currentValue: '泰国', targetValue: '', done: true },
-    { text: '学会游泳', category: '健康', deadline: '', note: '', progress: 100, currentValue: '', targetValue: '', done: true },
-    { text: '学会开车', category: '体验', deadline: '', note: '', progress: 100, currentValue: '', targetValue: '', done: true },
+    { text: '存款 50w', category: '财务', deadline: '2027-01-26', note: '已存 27w', progress: 54, currentValue: '27w', targetValue: '50w', done: false, dailyTasks: [
+      { id: uid(), text: '记账,记录今日支出', reward: 1 },
+      { id: uid(), text: '存下至少 500 元', reward: 2 },
+    ]},
+    { text: '月入三万,交社保', category: '事业', deadline: '', note: '', progress: 0, currentValue: '', targetValue: '月入3w', done: false, dailyTasks: [
+      { id: uid(), text: '更新一篇内容/接一个商单', reward: 2 },
+      { id: uid(), text: '复盘今日收入', reward: 1 },
+    ]},
+    { text: '培养输出型爱好,雅思 6.5', category: '学习', deadline: '2027-01-26', note: '', progress: 0, currentValue: '', targetValue: '雅思6.5', done: false, dailyTasks: [
+      { id: uid(), text: '背 50 个单词', reward: 2 },
+      { id: uid(), text: '听力练习 30 分钟', reward: 2 },
+      { id: uid(), text: '口语练习 15 分钟', reward: 1 },
+    ]},
+    { text: '保持在 96 斤', category: '健康', deadline: '2027-01-26', note: '', progress: 0, currentValue: '', targetValue: '96斤', done: false, dailyTasks: [
+      { id: uid(), text: '运动 30 分钟', reward: 2 },
+      { id: uid(), text: '控制饮食,不吃高热量', reward: 1 },
+      { id: uid(), text: '称体重记录', reward: 1 },
+    ]},
+    { text: '情绪稳定', category: '健康', deadline: '', note: '', progress: 0, currentValue: '', targetValue: '', done: false, dailyTasks: [
+      { id: uid(), text: '冥想/深呼吸 5 分钟', reward: 2 },
+      { id: uid(), text: '写感恩日记 3 件事', reward: 1 },
+    ]},
+    { text: '晚上 11 点睡觉', category: '健康', deadline: '', note: '', progress: 0, currentValue: '', targetValue: '23:00', done: false, dailyTasks: [
+      { id: uid(), text: '10:30 前放下手机', reward: 2 },
+      { id: uid(), text: '完成洗漱护肤', reward: 1 },
+    ]},
+    { text: '穿有气质的衣服', category: '形象', deadline: '', note: '', progress: 0, currentValue: '', targetValue: '', done: false, dailyTasks: [
+      { id: uid(), text: '提前搭配明日穿搭', reward: 1 },
+      { id: uid(), text: '整理衣柜,淘汰旧衣', reward: 1 },
+    ]},
+    { text: '妆容精致,会画眼妆', category: '形象', deadline: '', note: '', progress: 0, currentValue: '', targetValue: '', done: false, dailyTasks: [
+      { id: uid(), text: '练习眼妆 15 分钟', reward: 2 },
+      { id: uid(), text: '卸妆护肤', reward: 1 },
+    ]},
+    { text: '找个喜欢的人谈恋爱', category: '情感', deadline: '2027-01-26', note: '', progress: 0, currentValue: '', targetValue: '', done: false, dailyTasks: [
+      { id: uid(), text: '社交/认识新朋友', reward: 1 },
+      { id: uid(), text: '主动和感兴趣的人聊天', reward: 2 },
+    ]},
+    { text: '出国玩', category: '体验', deadline: '', note: '✅ 已去了泰国', progress: 100, currentValue: '泰国', targetValue: '', done: true, dailyTasks: [] },
+    { text: '学会游泳', category: '健康', deadline: '', note: '', progress: 100, currentValue: '', targetValue: '', done: true, dailyTasks: [] },
+    { text: '学会开车', category: '体验', deadline: '', note: '', progress: 100, currentValue: '', targetValue: '', done: true, dailyTasks: [] },
   ];
 }
 
@@ -672,6 +710,13 @@ function renderGoalDetail(goalId) {
   const todayCheckins = checkins.filter(c => c.date === todayStr());
   const todayAdded = todayCheckins.reduce((s,c) => s + c.add, 0);
 
+  // 每日分解任务
+  const dailyTasks = goal.dailyTasks || [];
+  // 今日完成状态
+  const todayDone = getPageData('goalDailyDone')[goalId] || {};
+  const todayDoneCount = dailyTasks.filter(t => todayDone[t.id]).length;
+  const allDone = dailyTasks.length > 0 && todayDoneCount === dailyTasks.length;
+
   let barColor = 'var(--accent)';
   if (progress >= 100) barColor = 'var(--success)';
   else if (progress >= 50) barColor = '#27AE60';
@@ -697,34 +742,65 @@ function renderGoalDetail(goalId) {
     <div class="card" style="text-align:center;background:var(--bg-card-hover)">
       <div style="font-size:13px;color:var(--text-muted)">今日已打卡</div>
       <div style="font-size:24px;font-weight:700;color:var(--success)">+${todayAdded}%</div>
-      <div style="font-size:12px;color:var(--text-muted)">共 ${todayCheckins.length} 次</div>
     </div>` : ''}
 
-    ${!goal.done ? `
-    <div class="card" style="text-align:center">
-      <div style="font-size:15px;font-weight:600;color:var(--text-secondary);margin-bottom:14px">今天为这个目标努力了吗?</div>
-      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
-        <button class="btn" style="font-size:16px;padding:14px 24px" onclick="quickCheckin('${goalId}',1)">+1%</button>
-        <button class="btn" style="font-size:16px;padding:14px 24px" onclick="quickCheckin('${goalId}',2)">+2%</button>
-        <button class="btn" style="font-size:16px;padding:14px 24px" onclick="quickCheckin('${goalId}',5)">+5%</button>
-        <button class="btn" style="font-size:16px;padding:14px 24px" onclick="quickCheckin('${goalId}',10)">+10%</button>
+    <!-- 每日分解任务 -->
+    <div class="card">
+      <div class="card-title">📋 每日该做什么 · ${todayStr()}</div>
+      ${dailyTasks.length === 0 ? `
+        <div class="empty"><div class="empty-icon">🌱</div>还没有分解每日任务<br>在下面添加吧</div>
+      ` : `
+        <div style="font-size:13px;color:var(--text-muted);margin-bottom:10px">
+          今日完成 ${todayDoneCount}/${dailyTasks.length}
+          ${dailyTasks.length > 0 ? `<span style="float:right">${Math.round(todayDoneCount/dailyTasks.length*100)}%</span>` : ''}
+        </div>
+        <div class="progress-bar" style="height:6px;margin-bottom:12px"><div class="progress-fill" style="width:${dailyTasks.length?todayDoneCount/dailyTasks.length*100:0}%"></div></div>
+        ${dailyTasks.map(t => `
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px dashed var(--border-soft)">
+            <div class="checkbox ${todayDone[t.id]?'checked':''}" onclick="toggleGoalDaily('${goalId}','${t.id}')" style="width:22px;height:22px"></div>
+            <div style="flex:1;font-size:15px;color:var(--text-primary);${todayDone[t.id]?'text-decoration:line-through;opacity:0.5':''}">${escapeHtml(t.text)}</div>
+            <button onclick="deleteDailyTask('${goalId}','${t.id}')" style="background:none;border:none;color:var(--text-muted);font-size:16px;cursor:pointer;padding:0 4px">×</button>
+          </div>
+        `).join('')}
+        ${allDone ? `<div style="text-align:center;padding:12px;background:#E8F5E9;border-radius:8px;margin-top:10px;color:var(--success);font-weight:600">🎉 今日任务全部完成!</div>` : ''}
+      `}
+    </div>
+
+    <!-- 添加每日任务 -->
+    <div class="card">
+      <div class="card-title">➕ 添加每日任务</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">设置每天要做的固定任务,完成后自动推进目标进度</div>
+      <div style="display:flex;gap:8px">
+        <input class="input" id="dailyTaskInput" placeholder="如:背50个单词" onkeydown="if(event.key==='Enter')addDailyTask('${goalId}')" style="flex:1">
+        <input class="input" id="dailyTaskReward" type="number" min="1" max="20" value="2" style="width:70px;text-align:center" title="完成后给目标加多少%">
+        <button class="btn" onclick="addDailyTask('${goalId}')">添加</button>
       </div>
-      <div style="margin-top:12px">
-        <button class="btn btn-outline" style="width:100%" onclick="customCheckin('${goalId}')">自定义进度</button>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:6px">右边的数字 = 完成后给目标加多少%进度</div>
+    </div>
+
+    <!-- 快速打卡 -->
+    ${!goal.done ? `
+    <div class="card">
+      <div class="card-title">⚡ 快速打卡</div>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <button class="btn" style="font-size:14px;padding:12px 20px" onclick="quickCheckin('${goalId}',1)">+1%</button>
+        <button class="btn" style="font-size:14px;padding:12px 20px" onclick="quickCheckin('${goalId}',2)">+2%</button>
+        <button class="btn" style="font-size:14px;padding:12px 20px" onclick="quickCheckin('${goalId}',5)">+5%</button>
+        <button class="btn btn-outline" style="font-size:14px;padding:12px 20px" onclick="customCheckin('${goalId}')">自定义</button>
       </div>
     </div>` : `
     <div class="card" style="text-align:center;background:#E8F5E9">
       <div style="font-size:40px;margin-bottom:8px">🎉</div>
       <div style="font-size:18px;font-weight:700;color:var(--success)">这个目标已完成!</div>
-      <div style="font-size:13px;color:var(--text-muted);margin-top:4px">恭喜你,继续加油</div>
     </div>`}
 
+    <!-- 打卡记录 -->
     <div class="card">
-      <div class="card-title">打卡记录</div>
-      ${checkins.length === 0 ? '<div class="empty"><div class="empty-icon">🌱</div>还没有打卡记录,点上面按钮开始吧</div>' :
-      `<div>${checkins.slice(-20).reverse().map(c => `
-        <div style="display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px dashed var(--border-soft)">
-          <div style="font-size:20px">📅</div>
+      <div class="card-title">📅 打卡记录</div>
+      ${checkins.length === 0 ? '<div class="empty">还没有打卡记录</div>' :
+      `<div>${checkins.slice(-15).reverse().map(c => `
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed var(--border-soft)">
+          <div style="font-size:18px">📅</div>
           <div style="flex:1">
             <div style="font-size:14px;font-weight:600;color:var(--success)">+${c.add}%</div>
             <div style="font-size:12px;color:var(--text-muted)">${c.date} ${c.time||''}</div>
@@ -735,12 +811,86 @@ function renderGoalDetail(goalId) {
     </div>
 
     <div class="card">
-      <button class="btn btn-outline" style="width:100%;color:var(--danger);border-color:var(--danger)" onclick="editLifeListProgress('${goalId}')">修改总进度</button>
+      <button class="btn btn-outline" style="width:100%" onclick="editLifeListProgress('${goalId}')">修改总进度</button>
     </div>
   `;
 }
 
-// 快速打卡:固定百分比
+// 添加每日分解任务
+function addDailyTask(goalId) {
+  const input = document.getElementById('dailyTaskInput');
+  const rewardInput = document.getElementById('dailyTaskReward');
+  const text = input.value.trim();
+  if (!text) { toast('请填写任务内容'); return; }
+  const reward = parseInt(rewardInput.value) || 1;
+  const goals = getPageData('lifeList');
+  const goal = goals.find(g => g.id === goalId);
+  if (!goal) return;
+  if (!goal.dailyTasks) goal.dailyTasks = [];
+  goal.dailyTasks.push({ id: uid(), text, reward });
+  setPageData('lifeList', goals);
+  renderPage();
+  toast('已添加每日任务');
+}
+
+// 删除每日分解任务
+function deleteDailyTask(goalId, taskId) {
+  if (!confirm('删除这个每日任务吗?')) return;
+  const goals = getPageData('lifeList');
+  const goal = goals.find(g => g.id === goalId);
+  if (!goal || !goal.dailyTasks) return;
+  goal.dailyTasks = goal.dailyTasks.filter(t => t.id !== taskId);
+  setPageData('lifeList', goals);
+  renderPage();
+  toast('已删除');
+}
+
+// 勾选/取消每日任务
+function toggleGoalDaily(goalId, taskId) {
+  const goals = getPageData('lifeList');
+  const goal = goals.find(g => g.id === goalId);
+  if (!goal || goal.done) return;
+  const task = (goal.dailyTasks || []).find(t => t.id === taskId);
+  if (!task) return;
+
+  // 读取今日完成状态
+  const allDone = getPageData('goalDailyDone');
+  const done = allDone[goalId] || {};
+  const wasDone = !!done[taskId];
+
+  if (!wasDone) {
+    // 完成 → 加进度
+    done[taskId] = true;
+    allDone[goalId] = done;
+    setPageData('goalDailyDone', allDone);
+
+    const oldProgress = goal.progress || 0;
+    const newProgress = Math.min(100, oldProgress + (task.reward || 1));
+    const actualAdd = newProgress - oldProgress;
+    goal.progress = newProgress;
+    if (!goal.checkins) goal.checkins = [];
+    goal.checkins.push({ date: todayStr(), time: new Date().toTimeString().slice(0,5), add: actualAdd, total: newProgress });
+    if (newProgress >= 100) goal.done = true;
+    setPageData('lifeList', goals);
+
+    if (newProgress >= 100) toast('🎉 目标完成!');
+    else toast(`✅ ${task.text} +${actualAdd}% → ${newProgress}%`);
+  } else {
+    // 取消完成 → 扣进度
+    done[taskId] = false;
+    allDone[goalId] = done;
+    setPageData('goalDailyDone', allDone);
+
+    const oldProgress = goal.progress || 0;
+    const newProgress = Math.max(0, oldProgress - (task.reward || 1));
+    goal.progress = newProgress;
+    setPageData('lifeList', goals);
+    toast('已取消,进度已扣回');
+  }
+  renderPage();
+}
+
+// 快速打卡
 function quickCheckin(goalId, add) {
   const goals = getPageData('lifeList');
   const goal = goals.find(g => g.id === goalId);
@@ -759,7 +909,6 @@ function quickCheckin(goalId, add) {
   else toast(`打卡成功!+${actualAdd}% → ${newProgress}%`);
 }
 
-// 自定义打卡
 function customCheckin(goalId) {
   const goals = getPageData('lifeList');
   const goal = goals.find(g => g.id === goalId);
