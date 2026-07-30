@@ -668,13 +668,9 @@ function renderGoalDetail(goalId) {
   const goal = goals.find(g => g.id === goalId);
   if (!goal) return '<div class="empty">目标不存在</div>';
   const progress = goal.done ? 100 : (goal.progress || 0);
-  const allPlans = getPageData('plan');
-  const relatedPlans = allPlans.filter(p => p.goalId === goalId);
-  const todayPlans = relatedPlans.filter(p => p.date === todayStr());
-  const doneToday = todayPlans.filter(p => p.done).length;
-
-  // 获取该目标最近7天的打卡记录
   const checkins = goal.checkins || [];
+  const todayCheckins = checkins.filter(c => c.date === todayStr());
+  const todayAdded = todayCheckins.reduce((s,c) => s + c.add, 0);
 
   let barColor = 'var(--accent)';
   if (progress >= 100) barColor = 'var(--success)';
@@ -685,65 +681,94 @@ function renderGoalDetail(goalId) {
 
   return `
     <div class="card" style="background:linear-gradient(135deg,#E8F5E9,#C8E6C9);border:1px solid var(--border)">
-      <div style="font-size:20px;font-weight:700;color:var(--accent);margin-bottom:6px">${goal.done ? '✅' : '🎯'} ${escapeHtml(goal.text)}</div>
+      <div style="font-size:22px;font-weight:700;color:var(--accent);margin-bottom:8px">${goal.done ? '✅' : '🎯'} ${escapeHtml(goal.text)}</div>
       <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
-        <span style="font-size:32px;font-weight:800;color:${barColor}">${progress}%</span>
+        <span style="font-size:36px;font-weight:800;color:${barColor}">${progress}%</span>
         ${valueDisplay}
       </div>
       <div class="progress-bar" style="height:14px;margin-top:10px"><div class="progress-fill" style="width:${progress}%;background:${barColor}"></div></div>
       <div style="font-size:12px;color:var(--text-muted);margin-top:6px">
-        ${escapeHtml(goal.category||'其他')} · ${goal.deadline?'截止 '+goal.deadline:'无截止日期'} · ${goal.done?'已完成':'进行中'}
+        ${goal.deadline?'截止 '+goal.deadline:'无截止日期'} · ${goal.done?'已完成':'进行中'}
       </div>
       ${goal.note?`<div style="margin-top:8px;font-size:13px;color:var(--text-secondary)">📝 ${escapeHtml(goal.note)}</div>`:''}
     </div>
 
-    <div class="stat-grid">
-      <div class="stat-card"><div class="stat-num">${todayPlans.length}</div><div class="stat-label">今日任务</div></div>
-      <div class="stat-card"><div class="stat-num">${doneToday}</div><div class="stat-label">今日完成</div></div>
-      <div class="stat-card"><div class="stat-num">${checkins.length}</div><div class="stat-label">打卡次数</div></div>
-    </div>
+    ${todayAdded > 0 ? `
+    <div class="card" style="text-align:center;background:var(--bg-card-hover)">
+      <div style="font-size:13px;color:var(--text-muted)">今日已打卡</div>
+      <div style="font-size:24px;font-weight:700;color:var(--success)">+${todayAdded}%</div>
+      <div style="font-size:12px;color:var(--text-muted)">共 ${todayCheckins.length} 次</div>
+    </div>` : ''}
 
-    <div class="card">
-      <div class="card-title">为这个目标添加今日任务</div>
-      <div><label class="label">📝 任务内容</label><input class="input" id="goalPlanInput" placeholder="如:存1000元" onkeydown="if(event.key==='Enter')addGoalPlan('${goalId}')"></div>
-      <div style="display:flex;gap:10px;margin-top:10px">
-        <div style="flex:1"><label class="label">⏰ 时间</label><input class="input" id="goalPlanTime" type="time" value="09:00"></div>
-        <div style="width:100px"><label class="label">完成奖励进度</label><input class="input" id="goalPlanReward" type="number" min="0" max="20" value="2" style="text-align:center"></div>
+    ${!goal.done ? `
+    <div class="card" style="text-align:center">
+      <div style="font-size:15px;font-weight:600;color:var(--text-secondary);margin-bottom:14px">今天为这个目标努力了吗?</div>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <button class="btn" style="font-size:16px;padding:14px 24px" onclick="quickCheckin('${goalId}',1)">+1%</button>
+        <button class="btn" style="font-size:16px;padding:14px 24px" onclick="quickCheckin('${goalId}',2)">+2%</button>
+        <button class="btn" style="font-size:16px;padding:14px 24px" onclick="quickCheckin('${goalId}',5)">+5%</button>
+        <button class="btn" style="font-size:16px;padding:14px 24px" onclick="quickCheckin('${goalId}',10)">+10%</button>
       </div>
-      <div style="margin-top:12px"><button class="btn" onclick="addGoalPlan('${goalId}')" style="width:100%">添加任务</button></div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">今日任务 · ${todayStr()}</div>
-      ${todayPlans.length === 0 ? '<div class="empty"><div class="empty-icon">🌱</div>今天还没有为这个目标安排任务</div>' :
-      `<div>${todayPlans.sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99')).map(item => renderGoalPlanItem(item, goalId)).join('')}</div>`}
-    </div>
+      <div style="margin-top:12px">
+        <button class="btn btn-outline" style="width:100%" onclick="customCheckin('${goalId}')">自定义进度</button>
+      </div>
+    </div>` : `
+    <div class="card" style="text-align:center;background:#E8F5E9">
+      <div style="font-size:40px;margin-bottom:8px">🎉</div>
+      <div style="font-size:18px;font-weight:700;color:var(--success)">这个目标已完成!</div>
+      <div style="font-size:13px;color:var(--text-muted);margin-top:4px">恭喜你,继续加油</div>
+    </div>`}
 
     <div class="card">
       <div class="card-title">打卡记录</div>
-      ${checkins.length === 0 ? '<div class="empty">还没有打卡记录</div>' :
-      `<div>${checkins.slice(-10).reverse().map(c => `
-        <div class="list-item">
-          <div class="list-item-content">
-            <div class="list-item-title">+${c.add}% → ${c.total}%</div>
-            <div class="list-item-meta">${c.date} ${c.time||''}</div>
+      ${checkins.length === 0 ? '<div class="empty"><div class="empty-icon">🌱</div>还没有打卡记录,点上面按钮开始吧</div>' :
+      `<div>${checkins.slice(-20).reverse().map(c => `
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px dashed var(--border-soft)">
+          <div style="font-size:20px">📅</div>
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:600;color:var(--success)">+${c.add}%</div>
+            <div style="font-size:12px;color:var(--text-muted)">${c.date} ${c.time||''}</div>
           </div>
+          <div style="font-size:14px;font-weight:600;color:var(--text-muted)">→ ${c.total}%</div>
         </div>
       `).join('')}</div>`}
     </div>
 
     <div class="card">
-      <div style="display:flex;gap:8px">
-        ${!goal.done ? `<button class="btn" onclick="checkinLifeList('${goalId}')">📅 快速打卡</button>` : ''}
-        <button class="btn btn-outline" onclick="editLifeListProgress('${goalId}')">修改进度</button>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">历史任务</div>
-      ${relatedPlans.filter(p=>p.date!==todayStr()).slice(-10).reverse().map(item => renderGoalPlanItem(item, goalId)).join('') || '<div class="empty">暂无</div>'}
+      <button class="btn btn-outline" style="width:100%;color:var(--danger);border-color:var(--danger)" onclick="editLifeListProgress('${goalId}')">修改总进度</button>
     </div>
   `;
+}
+
+// 快速打卡:固定百分比
+function quickCheckin(goalId, add) {
+  const goals = getPageData('lifeList');
+  const goal = goals.find(g => g.id === goalId);
+  if (!goal || goal.done) return;
+  const oldProgress = goal.progress || 0;
+  const newProgress = Math.min(100, oldProgress + add);
+  const actualAdd = newProgress - oldProgress;
+  if (actualAdd <= 0) { toast('进度已满!'); return; }
+  goal.progress = newProgress;
+  if (!goal.checkins) goal.checkins = [];
+  goal.checkins.push({ date: todayStr(), time: new Date().toTimeString().slice(0,5), add: actualAdd, total: newProgress });
+  if (newProgress >= 100) goal.done = true;
+  setPageData('lifeList', goals);
+  renderPage();
+  if (newProgress >= 100) toast('🎉 恭喜完成!');
+  else toast(`打卡成功!+${actualAdd}% → ${newProgress}%`);
+}
+
+// 自定义打卡
+function customCheckin(goalId) {
+  const goals = getPageData('lifeList');
+  const goal = goals.find(g => g.id === goalId);
+  if (!goal) return;
+  const input = prompt(`输入本次打卡进度(当前 ${goal.progress||0}%)`, '3');
+  if (input === null) return;
+  const add = parseInt(input) || 0;
+  if (add <= 0) { toast('请输入大于0的数字'); return; }
+  quickCheckin(goalId, add);
 }
 
 function renderGoalPlanItem(item, goalId) {
