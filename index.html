@@ -1,0 +1,1777 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="星澈">
+<meta name="theme-color" content="#FFD60A">
+<title>星澈 · 工作台</title>
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="manifest" href='/manifest.json'>
+<style>
+/* ========== 设计系统(绿色主题) ========== */
+:root {
+  --bg-primary: #E8F5E9;
+  --bg-secondary: #C8E6C9;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F1F8E9;
+  --text-primary: #1B5E20;
+  --text-secondary: #388E3C;
+  --text-muted: #66BB6A;
+  --accent: #2E7D32;
+  --accent-soft: #1B5E20;
+  --border: #A5D6A7;
+  --border-soft: #C8E6C9;
+  --danger: #C0392B;
+  --success: #2E7D32;
+  --shadow: rgba(27, 94, 32, 0.08);
+  --shadow-strong: rgba(27, 94, 32, 0.15);
+  --radius: 14px;
+  --radius-sm: 8px;
+  --sidebar-w: 240px;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+  --font-serif: "Noto Serif SC", "Songti SC", "SimSun", serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  font-family: var(--font);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+
+body { min-height: 100vh; }
+
+/* ========== 布局 ========== */
+.app {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ========== 侧边栏 ========== */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 100;
+  overflow-y: auto;
+  transition: transform 0.3s ease;
+}
+
+.sidebar-header {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+}
+
+.sidebar-logo {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: 6px;
+  color: var(--text-primary);
+  font-family: var(--font-serif);
+}
+
+.sidebar-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  letter-spacing: 2px;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 12px 10px;
+  list-style: none;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  margin-bottom: 4px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text-secondary);
+  transition: all 0.18s ease;
+  user-select: none;
+  position: relative;
+}
+
+.nav-item:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+}
+
+.nav-item.active {
+  background: var(--accent);
+  color: var(--bg-primary);
+  font-weight: 600;
+}
+
+.nav-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--border-soft);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.nav-item.active .nav-num {
+  background: var(--bg-primary);
+  color: var(--accent);
+}
+
+.nav-label { flex: 1; }
+
+.sidebar-footer {
+  padding: 14px 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+}
+
+.sidebar-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: var(--font);
+}
+
+.sidebar-btn:hover { background: var(--accent); color: var(--bg-primary); }
+
+/* ========== 主内容区 ========== */
+.main {
+  flex: 1;
+  margin-left: var(--sidebar-w);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  background: var(--bg-primary);
+  padding: 16px 32px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(10px);
+}
+
+.topbar-left { display: flex; align-items: center; gap: 14px; }
+
+.menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: var(--accent);
+  cursor: pointer;
+  padding: 4px;
+}
+
+.page-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.page-date {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-left: 12px;
+}
+
+.topbar-right { display: flex; gap: 8px; align-items: center; }
+
+.icon-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.15s;
+  font-family: var(--font);
+}
+
+.icon-btn:hover { background: var(--accent); color: var(--bg-primary); border-color: var(--accent); }
+
+.content {
+  flex: 1;
+  padding: 28px 32px 48px;
+  max-width: 960px;
+  width: 100%;
+}
+
+/* ========== 通用组件 ========== */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px var(--shadow);
+}
+
+.card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-title::before {
+  content: "";
+  width: 4px;
+  height: 16px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+.input, .textarea, .select {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: var(--font);
+  transition: border-color 0.15s;
+}
+
+.input:focus, .textarea:focus, .select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
+
+.label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: var(--bg-primary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: var(--font);
+}
+
+.btn:hover { opacity: 0.85; transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+
+.btn-outline {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+.btn-danger { background: var(--danger); }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+
+.row { display: flex; gap: 12px; }
+.col { flex: 1; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+/* 列表项 */
+.list-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  transition: all 0.15s;
+}
+
+.list-item:hover { border-color: var(--border); box-shadow: 0 2px 6px var(--shadow); }
+
+.list-item-content { flex: 1; min-width: 0; }
+
+.list-item-title { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; word-break: break-word; }
+.list-item-meta { font-size: 12px; color: var(--text-muted); }
+.list-item-body { font-size: 13px; color: var(--text-secondary); margin-top: 6px; line-height: 1.5; word-break: break-word; }
+
+.delete-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 18px;
+  padding: 0 4px;
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+.delete-btn:hover { color: var(--danger); }
+
+/* 复选框 */
+.checkbox {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+  transition: all 0.15s;
+  background: var(--bg-card);
+}
+.checkbox.checked { background: var(--accent); border-color: var(--accent); color: var(--bg-primary); }
+.checkbox.checked::after { content: "✓"; font-size: 13px; font-weight: 700; }
+
+.completed-text { text-decoration: line-through; color: var(--text-muted); }
+
+/* 空状态 */
+.empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.5; }
+
+/* 统计卡片 */
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  padding: 16px;
+  text-align: center;
+}
+.stat-num { font-size: 28px; font-weight: 800; color: var(--accent); }
+.stat-label { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+/* 标签 */
+.tag {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+}
+.tag-dark { background: var(--accent); color: var(--bg-primary); }
+
+/* 心情emoji选择 */
+.mood-picker { display: flex; gap: 8px; flex-wrap: wrap; }
+.mood-option {
+  font-size: 28px;
+  padding: 8px 12px;
+  border: 2px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  background: var(--bg-card);
+  transition: all 0.15s;
+}
+.mood-option.selected { border-color: var(--accent); background: var(--bg-card-hover); transform: scale(1.1); }
+
+/* 评分 */
+.rating { display: flex; gap: 4px; }
+.star { font-size: 22px; cursor: pointer; color: var(--border); transition: color 0.15s; }
+.star.active { color: #E89500; }
+
+/* 进度条 */
+.progress-bar { width: 100%; height: 8px; background: var(--border-soft); border-radius: 4px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--accent); border-radius: 4px; transition: width 0.3s; }
+
+/* 滑块美化 */
+input[type="range"] { -webkit-appearance: none; height: 6px; background: var(--border-soft); border-radius: 3px; outline: none; }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 2px solid var(--bg-card); box-shadow: 0 1px 4px var(--shadow); }
+
+/* 分类标签按钮 */
+.tag-btn {
+  display:inline-block;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600;
+  background:var(--bg-card);color:var(--text-secondary);border:1px solid var(--border);
+  cursor:pointer;user-select:none;transition:all 0.15s;
+}
+.tag-btn:active { transform:scale(0.95); }
+.tag-btn.active { background:var(--accent);color:#fff;border-color:var(--accent); }
+
+/* 遮罩 */
+.overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 99;
+}
+.overlay.show { display: block; }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--accent);
+  color: var(--bg-primary);
+  padding: 12px 24px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  z-index: 1000;
+  transition: transform 0.3s;
+  box-shadow: 0 4px 12px var(--shadow-strong);
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ========== 移动端 ========== */
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); box-shadow: 2px 0 20px var(--shadow-strong); }
+  .sidebar.open { transform: translateX(0); }
+  .main { margin-left: 0; }
+  .menu-toggle { display: block; }
+  .content { padding: 20px 16px 40px; }
+  .topbar { padding: 14px 16px; }
+  .page-title { font-size: 18px; }
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  .row { flex-direction: column; }
+}
+
+/* PWA 桌面模式 */
+@media (display-mode: standalone) {
+  body { user-select: none; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- 侧边栏 -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">星澈</div>
+      <div class="sidebar-sub">WORKBuddy · 工作台</div>
+    </div>
+    <ul class="sidebar-nav" id="nav"></ul>
+    <div class="sidebar-footer">
+      <button class="sidebar-btn" onclick="exportData()">导出</button>
+      <button class="sidebar-btn" onclick="document.getElementById('importFile').click()">导入</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+    </div>
+  </aside>
+
+  <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+  <!-- 主区 -->
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+        <span class="page-title" id="pageTitle">每日计划</span>
+        <span class="page-date" id="pageDate"></span>
+      </div>
+      <div class="topbar-right">
+        <button class="icon-btn" onclick="scrollToTop()">顶部</button>
+      </div>
+    </header>
+    <main class="content" id="content"></main>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ==================== 数据层 ====================
+const STORAGE_KEY = 'xingche_workbench_v1';
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch(e) { return {}; }
+}
+function saveData(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data || {}));
+}
+function getPageData(page) {
+  const all = loadData();
+  return all[page] || [];
+}
+function setPageData(page, arr) {
+  const all = loadData();
+  all[page] = arr;
+  saveData(all);
+}
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+// 首次启动时初始化「人生清单」预设数据
+function initLifeList() {
+  const existing = getPageData('lifeList');
+  if (existing.length > 0) {
+    // 检查是否有被误删的预设目标(如存款50w),自动补回
+    const presetTexts = ['存款 50w','月入三万,交社保','培养输出型爱好,雅思 6.5','保持在 96 斤','情绪稳定','晚上 11 点睡觉','穿有气质的衣服','妆容精致,会画眼妆','找个喜欢的人谈恋爱','出国玩','学会游泳','学会开车'];
+    const existingTexts = existing.map(x => x.text);
+    let needFix = false;
+    presetTexts.forEach(t => {
+      if (!existingTexts.includes(t)) {
+        // 找到对应预设并补回
+        const presets = getLifeListPresets();
+        const preset = presets.find(p => p.text === t);
+        if (preset) {
+          existing.push({ id: uid(), date: todayStr(), ...preset });
+          needFix = true;
+        }
+      }
+    });
+    if (needFix) {
+      setPageData('lifeList', existing);
+    }
+    return;
+  }
+  const presets = getLifeListPresets();
+  // 保持图片原始顺序,进行中的在前,已完成的在后
+  const list = presets.map(p => ({ id: uid(), date: todayStr(), ...p }));
+  setPageData('lifeList', list);
+}
+function getLifeListPresets() {
+  return [
+    { text: '存款 50w', category: '财务', deadline: '2027-01-26', note: '已存 27w', progress: 54, currentValue: '27w', targetValue: '50w', done: false },
+    { text: '月入三万,交社保', category: '事业', deadline: '', note: '', progress: 0, currentValue: '', targetValue: '月入3w', done: false },
+    { text: '培养输出型爱好,雅思 6.5', category: '学习', deadline: '2027-01-26', note: '', progress: 0, currentValue: '', targetValue: '雅思6.5', done: false },
+    { text: '保持在 96 斤', category: '健康', deadline: '2027-01-26', note: '', progress: 0, currentValue: '', targetValue: '96斤', done: false },
+    { text: '情绪稳定', category: '健康', deadline: '', note: '', progress: 0, currentValue: '', targetValue: '', done: false },
+    { text: '晚上 11 点睡觉', category: '健康', deadline: '', note: '', progress: 0, currentValue: '', targetValue: '23:00', done: false },
+    { text: '穿有气质的衣服', category: '形象', deadline: '', note: '', progress: 0, currentValue: '', targetValue: '', done: false },
+    { text: '妆容精致,会画眼妆', category: '形象', deadline: '', note: '', progress: 0, currentValue: '', targetValue: '', done: false },
+    { text: '找个喜欢的人谈恋爱', category: '情感', deadline: '2027-01-26', note: '', progress: 0, currentValue: '', targetValue: '', done: false },
+    { text: '出国玩', category: '体验', deadline: '', note: '✅ 已去了泰国', progress: 100, currentValue: '泰国', targetValue: '', done: true },
+    { text: '学会游泳', category: '健康', deadline: '', note: '', progress: 100, currentValue: '', targetValue: '', done: true },
+    { text: '学会开车', category: '体验', deadline: '', note: '', progress: 100, currentValue: '', targetValue: '', done: true },
+  ];
+}
+
+// ==================== 导航 ====================
+const PAGES = [
+  { id: 'plan',         name: '每日计划',     icon: '📋' },
+  { id: 'lifeList',     name: '人生清单',     icon: '🌟' },
+  { id: 'inspiration',  name: '选题每日灵感', icon: '💡' },
+  { id: 'workReview',   name: '工作复盘',     icon: '🔧' },
+  { id: 'lifeReview',   name: '生活复盘',     icon: '🌿' },
+  { id: 'reading',      name: '读书笔记',     icon: '📖' },
+  { id: 'quotes',       name: '好句笔记',     icon: '✨' },
+  { id: 'exercise',     name: '运动打卡',     icon: '🏃' },
+  { id: 'studyReport',  name: '每日学习汇报', icon: '🎓' },
+  { id: 'mood',         name: '心情日记',     icon: '🌙' },
+  { id: 'weekReview',   name: '周复盘',       icon: '📅' },
+];
+
+let currentPage = 'plan';
+
+function renderNav() {
+  const nav = document.getElementById('nav');
+  nav.innerHTML = PAGES.map((p, i) => `
+    <li class="nav-item ${p.id === currentPage ? 'active' : ''}" onclick="navigate('${p.id}')">
+      <span class="nav-num">${i+1}</span>
+      <span class="nav-label">${p.name}</span>
+    </li>
+  `).join('');
+}
+
+function navigate(page) {
+  currentPage = page;
+  renderNav();
+  renderPage();
+  toggleSidebar(false);
+  scrollToTop();
+}
+
+function scrollToTop() { window.scrollTo({top:0, behavior:'smooth'}); }
+
+function toggleSidebar(force) {
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('overlay');
+  if (force === false) { sb.classList.remove('open'); ov.classList.remove('show'); return; }
+  sb.classList.toggle('open');
+  ov.classList.toggle('show');
+}
+
+// ==================== 页面渲染分发 ====================
+function renderPage() {
+  const page = PAGES.find(p => p.id === currentPage);
+  document.getElementById('pageTitle').textContent = page.name;
+  document.getElementById('pageDate').textContent = formatDate(new Date());
+  const content = document.getElementById('content');
+  const renderer = RENDERERS[currentPage];
+  content.innerHTML = renderer ? renderer() : '<div class="empty">页面建设中</div>';
+  // 渲染后执行钩子
+  if (typeof AFTER_RENDER[currentPage] === 'function') AFTER_RENDER[currentPage]();
+}
+
+function formatDate(d) {
+  const days = ['日','一','二','三','四','五','六'];
+  return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 · 星期${days[d.getDay()]}`;
+}
+
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+// ==================== 通用渲染辅助 ====================
+function renderList(arr, renderFn) {
+  if (!arr || arr.length === 0) {
+    return `<div class="empty"><div class="empty-icon">🍃</div>暂无记录</div>`;
+  }
+  return arr.slice().reverse().map(renderFn).join('');
+}
+function renderListKeepOrder(arr, renderFn) {
+  if (!arr || arr.length === 0) {
+    return `<div class="empty"><div class="empty-icon">🍃</div>暂无记录</div>`;
+  }
+  return arr.slice().map(renderFn).join('');
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// ==================== 各页面模板 ====================
+const RENDERERS = {};
+const AFTER_RENDER = {};
+
+// ---------- 1. 每日计划 ----------
+RENDERERS.plan = function() {
+  const list = getPageData('plan');
+  const today = list.filter(x => x.date === todayStr());
+  const done = today.filter(x => x.done).length;
+  const total = today.length;
+  const pct = total ? Math.round(done/total*100) : 0;
+  return `
+    <div class="card" style="background:linear-gradient(135deg,#E8F5E9,#C8E6C9);border:1px solid var(--border)">
+      <div style="font-size:18px;font-weight:700;color:var(--accent);margin-bottom:6px">${getDailyQuote()}</div>
+      <div style="font-size:13px;color:var(--text-secondary)">每一步都在成为更好的自己</div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">今日任务</div></div>
+      <div class="stat-card"><div class="stat-num">${done}</div><div class="stat-label">已完成</div></div>
+      <div class="stat-card"><div class="stat-num">${pct}%</div><div class="stat-label">完成率</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">今日进度</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="progress-bar" style="flex:1;height:10px"><div class="progress-fill" style="width:${pct}%"></div></div>
+        <span style="font-size:13px;color:var(--text-muted);font-weight:600">${done}/${total}</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">今日任务清单 · ${todayStr()}</div>
+      ${today.length === 0 ? '<div class="empty"><div class="empty-icon">🌿</div>今天还没有安排,往下翻添加任务吧</div>' : renderTimelineGrouped(today)}
+    </div>
+    <div class="card">
+      <div class="card-title">添加任务</div>
+      <div><label class="label">📝 任务内容</label><input class="input" id="plInput" placeholder="如:健康早餐" onkeydown="if(event.key==='Enter')addPlan()"></div>
+      <div style="display:flex;gap:10px;margin-top:10px">
+        <div style="flex:1"><label class="label">⏰ 时间</label><input class="input" id="plTime" type="time" value="09:00"></div>
+        <div style="width:70px"><label class="label">图标</label><input class="input" id="plEmoji" placeholder="📌" style="text-align:center" maxlength="2"></div>
+      </div>
+      <div style="margin-top:10px">
+        <label class="label">🏷 分类</label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap" id="plCategoryBtns">
+          <span class="tag-btn active" onclick="selectCategory('饮食',this)">饮食</span>
+          <span class="tag-btn" onclick="selectCategory('运动',this)">运动</span>
+          <span class="tag-btn" onclick="selectCategory('学习',this)">学习</span>
+          <span class="tag-btn" onclick="selectCategory('工作',this)">工作</span>
+          <span class="tag-btn" onclick="selectCategory('生活',this)">生活</span>
+          <span class="tag-btn" onclick="selectCategory('护理',this)">护理</span>
+          <span class="tag-btn" onclick="selectCategory('其他',this)">其他</span>
+        </div>
+        <input type="hidden" id="plCategory" value="饮食">
+      </div>
+      <div style="margin-top:12px"><button class="btn" onclick="addPlan()" style="width:100%">添加任务</button></div>
+    </div>
+    <div class="card">
+      <div class="card-title">历史任务</div>
+      <div>${list.filter(x => x.date !== todayStr()).slice(-20).reverse().map(item => renderTimelineItem(item)).join('') || '<div class="empty">暂无</div>'}</div>
+    </div>
+  `;
+};
+// 按时间段分组渲染
+function renderTimelineGrouped(today) {
+  const groups = [
+    { name: '🌅 早晨', range: '05:00-11:59', items: [] },
+    { name: '☀️ 中午', range: '12:00-13:59', items: [] },
+    { name: '🌤️ 下午', range: '14:00-17:59', items: [] },
+    { name: '🌙 晚上', range: '18:00-23:59', items: [] },
+    { name: '🕒 未安排时间', range: '', items: [] },
+  ];
+  today.forEach(item => {
+    const t = item.time || '';
+    if (!t) { groups[4].items.push(item); return; }
+    const hour = parseInt(t.split(':')[0]);
+    if (hour < 12) groups[0].items.push(item);
+    else if (hour < 14) groups[1].items.push(item);
+    else if (hour < 18) groups[2].items.push(item);
+    else groups[3].items.push(item);
+  });
+  groups.forEach(g => g.items.sort((a,b) => (a.time||'99:99').localeCompare(b.time||'99:99')));
+  return groups.map(g => {
+    if (g.items.length === 0) return '';
+    return `
+      <div style="margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid var(--border)">
+          <span style="font-size:15px;font-weight:700;color:var(--accent)">${g.name}</span>
+          <span style="font-size:11px;color:var(--text-muted)">${g.range}</span>
+          <span style="font-size:11px;color:var(--text-muted);margin-left:auto">${g.items.filter(x=>x.done).length}/${g.items.length}</span>
+        </div>
+        ${g.items.map(item => renderTimelineItem(item)).join('')}
+      </div>
+    `;
+  }).join('');
+}
+function renderTimelineItem(item) {
+  const catColors = {
+    '饮食': {bg:'#FFE0B2',color:'#E65100'},
+    '运动': {bg:'#C8E6C9',color:'#1B5E20'},
+    '学习': {bg:'#BBDEFB',color:'#0D47A1'},
+    '工作': {bg:'#F8BBD0',color:'#880E4F'},
+    '生活': {bg:'#F0F4C3',color:'#827717'},
+    '护理': {bg:'#F8BBD0',color:'#AD1457'},
+    '其他': {bg:'#E0E0E0',color:'#424242'},
+  };
+  const cat = catColors[item.category || '其他'] || catColors['其他'];
+  return `
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px dashed var(--border-soft)">
+      <div style="position:relative;width:18px;flex-shrink:0">
+        <div style="position:absolute;left:6px;top:0;bottom:-100%;width:2px;background:var(--border)"></div>
+        <div style="position:absolute;left:3px;top:6px;width:10px;height:10px;border-radius:50%;background:${item.done?'var(--success)':'var(--border)'}"></div>
+      </div>
+      <div style="font-family:monospace;font-size:13px;color:var(--text-secondary);min-width:42px;font-weight:600">${item.time||'—:—'}</div>
+      <div class="checkbox ${item.done?'checked':''}" onclick="togglePlan('${item.id}')" style="width:18px;height:18px"></div>
+      <div style="font-size:18px;flex-shrink:0">${item.emoji||'📌'}</div>
+      <div style="flex:1;font-size:14px;color:var(--text-primary);${item.done?'text-decoration:line-through;opacity:0.6':''}">${escapeHtml(item.text)}</div>
+      <span style="font-size:11px;padding:2px 10px;border-radius:12px;background:${cat.bg};color:${cat.color};font-weight:600;flex-shrink:0">${escapeHtml(item.category||'其他')}</span>
+      <button onclick="deletePlan('${item.id}')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:16px;flex-shrink:0;padding:0 4px">×</button>
+    </div>
+  `;
+}
+// 每日激励语
+function getDailyQuote() {
+  const quotes = [
+    '你好,今天也要加油哦 🌿',
+    '新的一天,新的可能 ✨',
+    '每一步都在靠近目标 🌱',
+    '今天的努力,是明天的底气 💪',
+    '慢慢来,会比较快 🌿',
+    '别忘了夸夸自己 🌸',
+    '一切都会慢慢变好的 🌻',
+  ];
+  const d = new Date();
+  return quotes[d.getDay()];
+}
+function addPlan() {
+  const input = document.getElementById('plInput');
+  const timeInput = document.getElementById('plTime');
+  const emojiInput = document.getElementById('plEmoji');
+  const categoryInput = document.getElementById('plCategory');
+  const text = input.value.trim();
+  if (!text) { toast('请填写任务内容'); return; }
+  const list = getPageData('plan');
+  list.push({
+    id: uid(),
+    text,
+    done: false,
+    date: todayStr(),
+    time: timeInput.value || '',
+    emoji: emojiInput.value || '📌',
+    category: categoryInput.value,
+  });
+  setPageData('plan', list);
+  input.value = '';
+  emojiInput.value = '';
+  renderPage();
+  toast('已添加任务');
+}
+function selectCategory(cat, el) {
+  document.getElementById('plCategory').value = cat;
+  document.querySelectorAll('#plCategoryBtns .tag-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+function togglePlan(id) {
+  const list = getPageData('plan');
+  const item = list.find(x => x.id === id);
+  if (item) item.done = !item.done;
+  setPageData('plan', list);
+  renderPage();
+}
+function deletePlan(id) {
+  if (!confirm('确定删除这条任务吗?')) return;
+  let list = getPageData('plan');
+  list = list.filter(x => x.id !== id);
+  setPageData('plan', list);
+  renderPage();
+  toast('已删除');
+}
+
+// ---------- 2. 人生清单(目标打卡 + 进度条) ----------
+RENDERERS.lifeList = function() {
+  const list = getPageData('lifeList');
+  const done = list.filter(x => x.done).length;
+  const total = list.length;
+  const pct = total ? Math.round(done/total*100) : 0;
+  // 计算平均进度(基于每个目标的 progress 值)
+  const avgProgress = total ? Math.round(list.reduce((s,x)=>s+(x.progress||0),0)/total) : 0;
+  return `
+    <div class="card" style="background:linear-gradient(135deg,#FFD60A,#FFE564);border:none">
+      <div style="text-align:center;padding:8px 0">
+        <div style="font-size:13px;color:var(--text-secondary);margin-bottom:4px">送给自己的生日礼物</div>
+        <div style="font-size:20px;font-weight:700;color:var(--text-primary);font-family:var(--font-serif);letter-spacing:4px">人生是场体验</div>
+      </div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">总目标</div></div>
+      <div class="stat-card"><div class="stat-num">${done}</div><div class="stat-label">已完成</div></div>
+      <div class="stat-card"><div class="stat-num">${avgProgress}%</div><div class="stat-label">平均进度</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">总体进度</div>
+      <div class="progress-bar" style="height:12px"><div class="progress-fill" style="width:${avgProgress}%"></div></div>
+      <div style="text-align:right;font-size:12px;color:var(--text-muted);margin-top:4px">${done}/${total} 已完成 · 平均 ${avgProgress}%</div>
+    </div>
+    <div class="card">
+      <div class="card-title">进行中 · ${total-done}</div>
+      <div id="llActiveList">${renderListKeepOrder(list.filter(x=>!x.done), renderLifeListItem)}</div>
+    </div>
+    <div class="card">
+      <div class="card-title">已完成 · ${done}</div>
+      <div id="llDoneList">${renderListKeepOrder(list.filter(x=>x.done), renderLifeListItem)}</div>
+    </div>
+    <div class="card">
+      <div class="card-title">添加新目标</div>
+      <div class="grid-2">
+        <div><label class="label">目标</label><input class="input" id="llText" placeholder="想达成什么?"></div>
+        <div><label class="label">分类</label>
+          <select class="select" id="llCategory">
+            <option>健康</option><option>事业</option><option>学习</option><option>财务</option><option>形象</option><option>情感</option><option>体验</option><option>其他</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid-2" style="margin-top:12px">
+        <div><label class="label">当前进度</label><input class="input" id="llCurrent" type="number" min="0" max="100" placeholder="0-100" value="0"></div>
+        <div><label class="label">截止日期(可选)</label><input class="input" id="llDeadline" type="date"></div>
+      </div>
+      <div class="grid-2" style="margin-top:12px">
+        <div><label class="label">当前值(如:27w)</label><input class="input" id="llCurrentValue" placeholder="如:27w / 5.5分 / 98斤"></div>
+        <div><label class="label">目标值(如:50w)</label><input class="input" id="llTargetValue" placeholder="如:50w / 6.5分 / 96斤"></div>
+      </div>
+      <div style="margin-top:12px"><label class="label">备注</label><input class="input" id="llNote" placeholder="额外说明..."></div>
+      <div style="margin-top:12px"><button class="btn" onclick="addLifeList()">添加目标</button></div>
+    </div>
+  `;
+};
+function renderLifeListItem(item) {
+  const cat = item.category || '其他';
+  const progress = item.progress || 0;
+  const isDone = item.done;
+  const displayProgress = isDone ? 100 : progress;
+  // 进度条颜色:根据进度变化
+  let barColor = 'var(--accent)';
+  if (displayProgress >= 100) barColor = 'var(--success)';
+  else if (displayProgress >= 50) barColor = '#27AE60';
+  const valueDisplay = (item.currentValue || item.targetValue) ?
+    `<span style="font-size:12px;color:var(--text-muted)">${escapeHtml(item.currentValue||'？')} → ${escapeHtml(item.targetValue||'？')}</span>` : '';
+  // 打卡历史
+  const checkinHistory = (item.checkins && item.checkins.length > 0) ?
+    `<div style="margin-top:8px;padding:8px 10px;background:var(--bg-card-hover);border-radius:6px;font-size:11px;color:var(--text-muted)">
+      <b>打卡记录(${item.checkins.length}次):</b><br>
+      ${item.checkins.slice(-3).reverse().map(c => `· ${c.date} ${c.time} +${c.add}% → ${c.total}%`).join('<br>')}
+    </div>` : '';
+  return `
+    <div class="list-item" style="flex-direction:column;align-items:stretch;${isDone?'opacity:0.65':''}">
+      <div style="display:flex;align-items:flex-start;gap:12px;width:100%">
+        <div class="checkbox ${isDone?'checked':''}" onclick="toggleLifeList('${item.id}')"></div>
+        <div class="list-item-content" style="flex:1">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px">
+            <div class="list-item-title ${isDone?'completed-text':''}">${escapeHtml(item.text)} <span class="tag">${escapeHtml(cat)}</span></div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:18px;font-weight:700;color:${barColor}">${displayProgress}%</span>
+            </div>
+          </div>
+          <div class="list-item-meta">${item.date} ${item.deadline?'· 截止 '+item.deadline:''} ${valueDisplay}</div>
+          ${item.note?`<div class="list-item-body" style="color:var(--text-secondary)">📝 ${escapeHtml(item.note)}</div>`:''}
+          <!-- 独立进度条 -->
+          <div style="margin-top:10px">
+            <div class="progress-bar" style="height:10px"><div class="progress-fill" style="width:${displayProgress}%;background:${barColor}"></div></div>
+          </div>
+          ${checkinHistory}
+          <!-- 操作按钮 -->
+          <div style="display:flex;gap:8px;margin-top:10px">
+            ${!isDone ? `<button class="btn btn-sm" onclick="checkinLifeList('${item.id}')">📅 打卡</button>` : '<span style="font-size:12px;color:var(--success);padding:6px 0">✅ 已完成</span>'}
+            <button class="btn btn-sm btn-outline" onclick="editLifeListProgress('${item.id}')">修改进度</button>
+            <button class="btn btn-sm btn-outline" style="margin-left:auto;color:var(--danger);border-color:var(--danger)" onclick="deleteLifeList('${item.id}')">删除</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+function editLifeListProgress(id) {
+  const list = getPageData('lifeList');
+  const item = list.find(x => x.id === id);
+  if (!item) return;
+  const input = prompt(`修改进度(0-100):`, item.progress || 0);
+  if (input === null) return;
+  const val = Math.max(0, Math.min(100, parseInt(input) || 0));
+  item.progress = val;
+  if (val >= 100) item.done = true;
+  else item.done = false;
+  setPageData('lifeList', list);
+  renderPage();
+  toast('进度已更新');
+}
+function addLifeList() {
+  const text = document.getElementById('llText').value.trim();
+  const category = document.getElementById('llCategory').value;
+  const deadline = document.getElementById('llDeadline').value;
+  const note = document.getElementById('llNote').value.trim();
+  const progress = parseInt(document.getElementById('llCurrent').value) || 0;
+  const currentValue = document.getElementById('llCurrentValue').value.trim();
+  const targetValue = document.getElementById('llTargetValue').value.trim();
+  if (!text) { toast('请填写目标'); return; }
+  const list = getPageData('lifeList');
+  const done = progress >= 100;
+  list.push({ id: uid(), text, category, deadline, note, progress, currentValue, targetValue, done, date: todayStr() });
+  setPageData('lifeList', list);
+  renderPage();
+  toast('已添加目标');
+}
+function toggleLifeList(id) {
+  const list = getPageData('lifeList');
+  const item = list.find(x => x.id === id);
+  if (item) {
+    item.done = !item.done;
+    if (item.done) item.progress = 100;
+    else if (item.progress >= 100) item.progress = 90;
+  }
+  setPageData('lifeList', list);
+  renderPage();
+  toast(item.done ? '🎉 恭喜完成一项!' : '已取消完成');
+}
+function deleteLifeList(id) {
+  if (!confirm('确定要删除这个目标吗?删除后无法恢复。')) return;
+  let list = getPageData('lifeList');
+  list = list.filter(x => x.id !== id);
+  setPageData('lifeList', list);
+  renderPage();
+  toast('已删除');
+}
+// 打卡:弹窗输入本次完成的进度增量
+function checkinLifeList(id) {
+  const list = getPageData('lifeList');
+  const item = list.find(x => x.id === id);
+  if (!item) return;
+  const current = item.progress || 0;
+  const input = prompt(`打卡:本次完成了多少?(输入0-100的数字)\n当前进度:${current}%\n例如:存了1w就输入2(代表+2%)`, '');
+  if (input === null) return;
+  const add = parseInt(input) || 0;
+  if (add <= 0) { toast('请输入大于0的数字'); return; }
+  const newProgress = Math.min(100, current + add);
+  item.progress = newProgress;
+  // 记录打卡历史
+  if (!item.checkins) item.checkins = [];
+  item.checkins.push({ date: todayStr(), time: new Date().toTimeString().slice(0,5), add: add, total: newProgress });
+  if (newProgress >= 100) item.done = true;
+  setPageData('lifeList', list);
+  renderPage();
+  if (newProgress >= 100) toast('🎉 恭喜完成!');
+  else toast(`打卡成功!+${add}% → ${newProgress}%`);
+}
+
+// ---------- 3. 选题每日灵感 ----------
+RENDERERS.inspiration = function() {
+  const list = getPageData('inspiration');
+  return `
+    <div class="card">
+      <div class="card-title">记录灵感</div>
+      <div class="grid-2">
+        <div><label class="label">选题方向</label><input class="input" id="inspTopic" placeholder="如:职场/情感/科技"></div>
+        <div><label class="label">标题/关键词</label><input class="input" id="inspTitle" placeholder="一句话概括"></div>
+      </div>
+      <div style="margin-top:12px"><label class="label">灵感详情</label><textarea class="textarea" id="inspBody" placeholder="展开思路、角度、素材来源..."></textarea></div>
+      <div style="margin-top:12px"><label class="label">标签(逗号分隔)</label><input class="input" id="inspTags" placeholder="热点,原创,系列"></div>
+      <div style="margin-top:12px"><button class="btn" onclick="addInspiration()">保存灵感</button></div>
+    </div>
+    <div class="card">
+      <div class="card-title">灵感库</div>
+      <div id="inspList">${renderList(list, renderInspItem)}</div>
+    </div>
+  `;
+};
+function renderInspItem(item) {
+  const tags = (item.tags||'').split(',').filter(Boolean).map(t=>`<span class="tag">${escapeHtml(t.trim())}</span>`).join(' ');
+  return `
+    <div class="list-item">
+      <div class="list-item-content">
+        <div class="list-item-title">${escapeHtml(item.title)}</div>
+        <div class="list-item-meta">${item.date} · ${escapeHtml(item.topic||'未分类')}</div>
+        ${item.body?`<div class="list-item-body">${escapeHtml(item.body)}</div>`:''}
+        <div style="margin-top:8px">${tags}</div>
+      </div>
+      <button class="delete-btn" onclick="deleteInspiration('${item.id}')">×</button>
+    </div>
+  `;
+}
+function addInspiration() {
+  const topic = document.getElementById('inspTopic').value.trim();
+  const title = document.getElementById('inspTitle').value.trim();
+  const body = document.getElementById('inspBody').value.trim();
+  const tags = document.getElementById('inspTags').value.trim();
+  if (!title) { toast('请填写标题'); return; }
+  const list = getPageData('inspiration');
+  list.push({ id: uid(), topic, title, body, tags, date: todayStr() });
+  setPageData('inspiration', list);
+  renderPage();
+  toast('灵感已记录');
+}
+function deleteInspiration(id) {
+  let list = getPageData('inspiration');
+  list = list.filter(x => x.id !== id);
+  setPageData('inspiration', list);
+  renderPage();
+}
+
+// ---------- 3. 工作复盘 ----------
+RENDERERS.workReview = function() {
+  const list = getPageData('workReview');
+  return `
+    <div class="card">
+      <div class="card-title">工作复盘 · ${todayStr()}</div>
+      <div class="grid-2">
+        <div><label class="label">今日目标达成情况</label>
+          <select class="select" id="wrAchieve">
+            <option value="超额完成">超额完成</option>
+            <option value="达成">达成</option>
+            <option value="部分达成">部分达成</option>
+            <option value="未达成">未达成</option>
+          </select>
+        </div>
+        <div><label class="label">效率自评 (1-10)</label><input class="input" id="wrScore" type="number" min="1" max="10" value="7"></div>
+      </div>
+      <div style="margin-top:12px"><label class="label">做了什么(成果)</label><textarea class="textarea" id="wrDone" placeholder="列出今日完成的主要工作..."></textarea></div>
+      <div style="margin-top:12px"><label class="label">做得怎么样(亮点)</label><textarea class="textarea" id="wrGood" placeholder="哪些做得好?为什么?"></textarea></div>
+      <div style="margin-top:12px"><label class="label">问题与不足</label><textarea class="textarea" id="wrBad" placeholder="遇到什么问题?卡在哪?"></textarea></div>
+      <div style="margin-top:12px"><label class="label">改进措施 & 明日计划</label><textarea class="textarea" id="wrNext" placeholder="明天怎么做得更好?"></textarea></div>
+      <div style="margin-top:12px"><button class="btn" onclick="addWorkReview()">保存复盘</button></div>
+    </div>
+    <div class="card">
+      <div class="card-title">历史复盘</div>
+      <div id="wrList">${renderList(list, renderWorkReviewItem)}</div>
+    </div>
+  `;
+};
+function renderWorkReviewItem(item) {
+  return `
+    <div class="list-item" style="flex-direction:column;align-items:stretch">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span class="list-item-title">${item.date}</span>
+        <div><span class="tag tag-dark">${escapeHtml(item.achieve||'')}</span> <span class="tag">${escapeHtml(item.score||'')}/10</span></div>
+      </div>
+      ${item.done?`<div class="list-item-body"><b>成果:</b><br>${escapeHtml(item.done)}</div>`:''}
+      ${item.good?`<div class="list-item-body"><b>亮点:</b><br>${escapeHtml(item.good)}</div>`:''}
+      ${item.bad?`<div class="list-item-body"><b>不足:</b><br>${escapeHtml(item.bad)}</div>`:''}
+      ${item.next?`<div class="list-item-body"><b>改进:</b><br>${escapeHtml(item.next)}</div>`:''}
+      <div style="text-align:right;margin-top:6px"><button class="delete-btn" onclick="deleteWorkReview('${item.id}')">×</button></div>
+    </div>
+  `;
+}
+function addWorkReview() {
+  const achieve = document.getElementById('wrAchieve').value;
+  const score = document.getElementById('wrScore').value;
+  const done = document.getElementById('wrDone').value.trim();
+  const good = document.getElementById('wrGood').value.trim();
+  const bad = document.getElementById('wrBad').value.trim();
+  const next = document.getElementById('wrNext').value.trim();
+  if (!done) { toast('请填写今日成果'); return; }
+  const list = getPageData('workReview');
+  list.push({ id: uid(), date: todayStr(), achieve, score, done, good, bad, next });
+  setPageData('workReview', list);
+  renderPage();
+  toast('复盘已保存');
+}
+function deleteWorkReview(id) {
+  let list = getPageData('workReview');
+  list = list.filter(x => x.id !== id);
+  setPageData('workReview', list);
+  renderPage();
+}
+
+// ---------- 4. 生活复盘 ----------
+RENDERERS.lifeReview = function() {
+  const list = getPageData('lifeReview');
+  return `
+    <div class="card">
+      <div class="card-title">生活复盘 · ${todayStr()}</div>
+      <div class="grid-2">
+        <div><label class="label">作息</label>
+          <select class="select" id="lrSleep">
+            <option value="早睡早起">早睡早起</option>
+            <option value="正常">正常</option>
+            <option value="晚睡">晚睡</option>
+            <option value="熬夜">熬夜</option>
+          </select>
+        </div>
+        <div><label class="label">饮食</label>
+          <select class="select" id="lrDiet">
+            <option value="健康">健康</option>
+            <option value="正常">正常</option>
+            <option value="外卖为主">外卖为主</option>
+            <option value="不规律">不规律</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-top:12px"><label class="label">今日小确幸(开心的事)</label><textarea class="textarea" id="lrHappy" placeholder="哪怕很小的事也值得记录..."></textarea></div>
+      <div style="margin-top:12px"><label class="label">情绪状态</label><textarea class="textarea" id="lrMood" placeholder="今天心情如何?有什么感受?"></textarea></div>
+      <div style="margin-top:12px"><label class="label">社交/家庭</label><textarea class="textarea" id="lrSocial" placeholder="和谁交流了?有什么感触?"></textarea></div>
+      <div style="margin-top:12px"><label class="label">反思 & 明日小目标</label><textarea class="textarea" id="lrReflect" placeholder="想让明天有什么不同?"></textarea></div>
+      <div style="margin-top:12px"><button class="btn" onclick="addLifeReview()">保存</button></div>
+    </div>
+    <div class="card">
+      <div class="card-title">生活记录</div>
+      <div id="lrList">${renderList(list, renderLifeReviewItem)}</div>
+    </div>
+  `;
+};
+function renderLifeReviewItem(item) {
+  return `
+    <div class="list-item" style="flex-direction:column;align-items:stretch">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span class="list-item-title">${item.date}</span>
+        <div><span class="tag">${escapeHtml(item.sleep||'')}</span> <span class="tag">${escapeHtml(item.diet||'')}</span></div>
+      </div>
+      ${item.happy?`<div class="list-item-body"><b>小确幸:</b><br>${escapeHtml(item.happy)}</div>`:''}
+      ${item.mood?`<div class="list-item-body"><b>情绪:</b><br>${escapeHtml(item.mood)}</div>`:''}
+      ${item.social?`<div class="list-item-body"><b>社交:</b><br>${escapeHtml(item.social)}</div>`:''}
+      ${item.reflect?`<div class="list-item-body"><b>反思:</b><br>${escapeHtml(item.reflect)}</div>`:''}
+      <div style="text-align:right;margin-top:6px"><button class="delete-btn" onclick="deleteLifeReview('${item.id}')">×</button></div>
+    </div>
+  `;
+}
+function addLifeReview() {
+  const sleep = document.getElementById('lrSleep').value;
+  const diet = document.getElementById('lrDiet').value;
+  const happy = document.getElementById('lrHappy').value.trim();
+  const mood = document.getElementById('lrMood').value.trim();
+  const social = document.getElementById('lrSocial').value.trim();
+  const reflect = document.getElementById('lrReflect').value.trim();
+  if (!happy && !mood) { toast('请至少填写一项'); return; }
+  const list = getPageData('lifeReview');
+  list.push({ id: uid(), date: todayStr(), sleep, diet, happy, mood, social, reflect });
+  setPageData('lifeReview', list);
+  renderPage();
+  toast('生活复盘已保存');
+}
+function deleteLifeReview(id) {
+  let list = getPageData('lifeReview');
+  list = list.filter(x => x.id !== id);
+  setPageData('lifeReview', list);
+  renderPage();
+}
+
+// ---------- 5. 读书笔记 ----------
+RENDERERS.reading = function() {
+  const list = getPageData('reading');
+  const reading = list.filter(x => x.status === '在读');
+  const finished = list.filter(x => x.status === '读完');
+  return `
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-num">${list.length}</div><div class="stat-label">总书目</div></div>
+      <div class="stat-card"><div class="stat-num">${reading.length}</div><div class="stat-label">在读</div></div>
+      <div class="stat-card"><div class="stat-num">${finished.length}</div><div class="stat-label">已读完</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">添加书目</div>
+      <div class="grid-2">
+        <div><label class="label">书名</label><input class="input" id="rdTitle" placeholder="书名"></div>
+        <div><label class="label">作者</label><input class="input" id="rdAuthor" placeholder="作者"></div>
+      </div>
+      <div class="grid-2" style="margin-top:12px">
+        <div><label class="label">状态</label>
+          <select class="select" id="rdStatus">
+            <option value="想读">想读</option>
+            <option value="在读">在读</option>
+            <option value="读完">读完</option>
+          </select>
+        </div>
+        <div><label class="label">评分 (1-5)</label>
+          <div class="rating" id="rdRating">
+            ${[1,2,3,4,5].map(n=>`<span class="star" data-val="${n}" onclick="setRating('rdRating','rdRatingVal',${n})">★</span>`).join('')}
+          </div>
+          <input type="hidden" id="rdRatingVal" value="0">
+        </div>
+      </div>
+      <div style="margin-top:12px"><label class="label">核心笔记 / 摘要</label><textarea class="textarea" id="rdNotes" placeholder="这本书讲了什么?你的收获?"></textarea></div>
+      <div style="margin-top:12px"><label class="label">金句摘录</label><textarea class="textarea" id="rdQuotes" placeholder="印象深刻的句子..."></textarea></div>
+      <div style="margin-top:12px"><button class="btn" onclick="addReading()">保存</button></div>
+    </div>
+    <div class="card">
+      <div class="card-title">书架</div>
+      <div id="rdList">${renderList(list, renderReadingItem)}</div>
+    </div>
+  `;
+};
+function renderReadingItem(item) {
+  const stars = '★'.repeat(item.rating||0) + '☆'.repeat(5-(item.rating||0));
+  const statusTag = item.status === '读完' ? 'tag-dark' : '';
+  return `
+    <div class="list-item" style="flex-direction:column;align-items:stretch">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+        <div>
+          <div class="list-item-title">${escapeHtml(item.title)}</div>
+          <div class="list-item-meta">${escapeHtml(item.author||'佚名')} · ${item.date}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+          <span class="tag ${statusTag}">${escapeHtml(item.status||'')}</span>
+          <span style="color:#E89500;font-size:14px">${stars}</span>
+        </div>
+      </div>
+      ${item.notes?`<div class="list-item-body"><b>笔记:</b><br>${escapeHtml(item.notes)}</div>`:''}
+      ${item.quotes?`<div class="list-item-body"><b>金句:</b><br>${escapeHtml(item.quotes)}</div>`:''}
+      <div style="text-align:right;margin-top:6px"><button class="delete-btn" onclick="deleteReading('${item.id}')">×</button></div>
+    </div>
+  `;
+}
+function setRating(containerId, valId, val) {
+  document.getElementById(valId).value = val;
+  const stars = document.querySelectorAll('#'+containerId+' .star');
+  stars.forEach((s,i) => s.classList.toggle('active', i < val));
+}
+function addReading() {
+  const title = document.getElementById('rdTitle').value.trim();
+  const author = document.getElementById('rdAuthor').value.trim();
+  const status = document.getElementById('rdStatus').value;
+  const rating = parseInt(document.getElementById('rdRatingVal').value) || 0;
+  const notes = document.getElementById('rdNotes').value.trim();
+  const quotes = document.getElementById('rdQuotes').value.trim();
+  if (!title) { toast('请填写书名'); return; }
+  const list = getPageData('reading');
+  list.push({ id: uid(), title, author, status, rating, notes, quotes, date: todayStr() });
+  setPageData('reading', list);
+  renderPage();
+  toast('已加入书架');
+}
+function deleteReading(id) {
+  let list = getPageData('reading');
+  list = list.filter(x => x.id !== id);
+  setPageData('reading', list);
+  renderPage();
+}
+
+// ---------- 6. 好句笔记 ----------
+RENDERERS.quotes = function() {
+  const list = getPageData('quotes');
+  return `
+    <div class="card">
+      <div class="card-title">收藏好句</div>
+      <div><label class="label">句子</label><textarea class="textarea" id="qtText" placeholder="写下打动你的句子..." style="min-height:60px"></textarea></div>
+      <div class="grid-2" style="margin-top:12px">
+        <div><label class="label">出处</label><input class="input" id="qtSource" placeholder="书名/电影/人物/网络"></div>
+        <div><label class="label">分类</label>
+          <select class="select" id="qtCategory">
+            <option value="励志">励志</option>
+            <option value="情感">情感</option>
+            <option value="哲理">哲理</option>
+            <option value="生活">生活</option>
+            <option value="文学">文学</option>
+            <option value="其他">其他</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-top:12px"><label class="label">我的感悟(可选)</label><textarea class="textarea" id="qtThought" placeholder="为什么喜欢这句?"></textarea></div>
+      <div style="margin-top:12px"><button class="btn" onclick="addQuote()">收藏</button></div>
+    </div>
+    <div class="card">
+      <div class="card-title">好句集</div>
+      <div id="qtList">${renderList(list, renderQuoteItem)}</div>
+    </div>
+  `;
+};
+function renderQuoteItem(item) {
+  return `
+    <div class="list-item" style="flex-direction:column;align-items:stretch;background:var(--bg-card-hover);border-left:3px solid var(--accent)">
+      <div style="font-family:var(--font-serif);font-size:16px;line-height:1.7;color:var(--text-primary);margin-bottom:6px">"${escapeHtml(item.text)}"</div>
+      <div class="list-item-meta">—— ${escapeHtml(item.source||'未知')} · <span class="tag">${escapeHtml(item.category||'')}</span></div>
+      ${item.thought?`<div class="list-item-body" style="margin-top:8px;font-style:italic">💭 ${escapeHtml(item.thought)}</div>`:''}
+      <div style="text-align:right;margin-top:6px"><button class="delete-btn" onclick="deleteQuote('${item.id}')">×</button></div>
+    </div>
+  `;
+}
+function addQuote() {
+  const text = document.getElementById('qtText').value.trim();
+  const source = document.getElementById('qtSource').value.trim();
+  const category = document.getElementById('qtCategory').value;
+  const thought = document.getElementById('qtThought').value.trim();
+  if (!text) { toast('请填写句子'); return; }
+  const list = getPageData('quotes');
+  list.push({ id: uid(), text, source, category, thought, date: todayStr() });
+  setPageData('quotes', list);
+  renderPage();
+  toast('已收藏');
+}
+function deleteQuote(id) {
+  let list = getPageData('quotes');
+  list = list.filter(x => x.id !== id);
+  setPageData('quotes', list);
+  renderPage();
+}
+
+// ---------- 7. 运动打卡 ----------
+RENDERERS.exercise = function() {
+  const list = getPageData('exercise');
+  // 本周打卡
+  const now = new Date();
+  const weekStart = new Date(now);
+  weekStart.setDate(now.getDate() - now.getDay());
+  weekStart.setHours(0,0,0,0);
+  const weekList = list.filter(x => new Date(x.date) >= weekStart);
+  const totalMin = weekList.reduce((s,x)=>s+(parseInt(x.duration)||0),0);
+  const types = {};
+  weekList.forEach(x => { types[x.type] = (types[x.type]||0)+1; });
+  const typeStr = Object.entries(types).map(([k,v])=>`${k}×${v}`).join(' ') || '暂无';
+  // 连续打卡
+  let streak = 0;
+  const dates = [...new Set(list.map(x=>x.date))].sort().reverse();
+  if (dates.length) {
+    let d = new Date();
+    for (;;) {
+      const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      if (dates.includes(ds)) { streak++; d.setDate(d.getDate()-1); }
+      else break;
+    }
+  }
+  return `
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-num">${streak}</div><div class="stat-label">连续打卡(天)</div></div>
+      <div class="stat-card"><div class="stat-num">${weekList.length}</div><div class="stat-label">本周次数</div></div>
+      <div class="stat-card"><div class="stat-num">${totalMin}</div><div class="stat-label">本周时长(分)</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">运动打卡 · ${todayStr()}</div>
+      <div class="grid-3">
+        <div><label class="label">运动类型</label>
+          <select class="select" id="exType">
+            <option>跑步</option><option>健身</option><option>瑜伽</option><option>骑行</option>
+            <option>游泳</option><option>球类</option><option>散步</option><option>其他</option>
+          </select>
+        </div>
+        <div><label class="label">时长(分钟)</label><input class="input" id="exDuration" type="number" value="30"></div>
+        <div><label class="label">强度</label>
+          <select class="select" id="exIntensity">
+            <option>轻松</option><option>适中</option><option>高强度</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid-2" style="margin-top:12px">
+        <div><label class="label">距离/组数(可选)</label><input class="input" id="exAmount" placeholder="如 5km / 4组"></div>
+        <div><label class="label">日期</label><input class="input" id="exDate" type="date" value="${todayStr()}"></div>
+      </div>
+      <div style="margin-top:12px"><label class="label">感受</label><textarea class="textarea" id="exFeel" placeholder="运动后状态如何?"></textarea></div>
+      <div style="margin-top:12px"><button class="btn" onclick="addExercise()">打卡</button></div>
+    </div>
+    <div class="card">
+      <div class="card-title">本周运动 · ${typeStr}</div>
+      <div id="exWeekList">${renderList(weekList, renderExerciseItem)}</div>
+    </div>
+    <div class="card">
+      <div class="card-title">全部记录</div>
+      <div id="exAllList">${renderList(list.filter(x=>!weekList.includes(x)), renderExerciseItem)}</div>
+    </div>
+  `;
+};
+function renderExerciseItem(item) {
+  return `
+    <div class="list-item">
+      <div style="font-size:24px">${getExIcon(item.type)}</div>
+      <div class="list-item-content">
+        <div class="list-item-title">${escapeHtml(item.type)} · ${escapeHtml(item.duration||0)}分钟 <span class="tag">${escapeHtml(item.intensity||'')}</span></div>
+        <div class="list-item-meta">${item.date} ${item.amount?'· '+escapeHtml(item.amount):''}</div>
+        ${item.feel?`<div class="list-item-body">${escapeHtml(item.feel)}</div>`:''}
+      </div>
+      <button class="delete-btn" onclick="deleteExercise('${item.id}')">×</button>
+    </div>
+  `;
+}
+function getExIcon(type) {
+  const m = {'跑步':'🏃','健身':'💪','瑜伽':'🧘','骑行':'🚴','游泳':'🏊','球类':'⚽','散步':'🚶','其他':'⭐'};
+  return m[type] || '⭐';
+}
+function addExercise() {
+  const type = document.getElementById('exType').value;
+  const duration = document.getElementById('exDuration').value;
+  const intensity = document.getElementById('exIntensity').value;
+  const amount = document.getElementById('exAmount').value.trim();
+  const date = document.getElementById('exDate').value;
+  const feel = document.getElementById('exFeel').value.trim();
+  const list = getPageData('exercise');
+  list.push({ id: uid(), type, duration, intensity, amount, date, feel });
+  setPageData('exercise', list);
+  renderPage();
+  toast('打卡成功!加油💪');
+}
+function deleteExercise(id) {
+  let list = getPageData('exercise');
+  list = list.filter(x => x.id !== id);
+  setPageData('exercise', list);
+  renderPage();
+}
+
+// ---------- 8. 每日学习汇报 ----------
+RENDERERS.studyReport = function() {
+  const list = getPageData('studyReport');
+  const totalMin = list.reduce((s,x)=>s+(parseInt(x.duration)||0),0);
+  return `
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-num">${list.length}</div><div class="stat-label">学习记录</div></div>
+      <div class="stat-card"><div class="stat-num">${totalMin}</div><div class="stat-label">累计时长(分)</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">学习汇报 · ${todayStr()}</div>
+      <div class="grid-2">
+        <div><label class="label">学习主题</label><input class="input" id="srTopic" placeholder="如:React Hooks / 英语口语"></div>
+        <div><label class="label">学习时长(分钟)</label><input class="input" id="srDuration" type="number" value="60"></div>
+      </div>
+      <div style="margin-top:12px"><label class="label">学到了什么(知识点)</label><textarea class="textarea" id="srLearned" placeholder="列出今天掌握的知识点..."></textarea></div>
+      <div style="margin-top:12px"><label class="label">遇到的难点</label><textarea class="textarea" id="srDifficulty" placeholder="哪些地方没搞懂?"></textarea></div>
+      <div style="margin-top:12px"><label class="label">明日学习计划</label><textarea class="textarea" id="srNext" placeholder="明天继续学什么?"></textarea></div>
+      <div style="margin-top:12px"><label class="label">掌握程度</label>
+        <select class="select" id="srLevel">
+          <option value="初步了解">初步了解</option>
+          <option value="基本掌握">基本掌握</option>
+          <option value="熟练运用">熟练运用</option>
+          <option value="精通">精通</option>
+        </select>
+      </div>
+      <div style="margin-top:12px"><button class="btn" onclick="addStudyReport()">提交汇报</button></div>
+    </div>
+    <div class="card">
+      <div class="card-title">学习档案</div>
+      <div id="srList">${renderList(list, renderStudyItem)}</div>
+    </div>
+  `;
+};
+function renderStudyItem(item) {
+  return `
+    <div class="list-item" style="flex-direction:column;align-items:stretch">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span class="list-item-title">${escapeHtml(item.topic)}</span>
+        <div><span class="tag">${escapeHtml(item.duration||0)}分</span> <span class="tag tag-dark">${escapeHtml(item.level||'')}</span></div>
+      </div>
+      <div class="list-item-meta">${item.date}</div>
+      ${item.learned?`<div class="list-item-body"><b>学到:</b><br>${escapeHtml(item.learned)}</div>`:''}
+      ${item.difficulty?`<div class="list-item-body"><b>难点:</b><br>${escapeHtml(item.difficulty)}</div>`:''}
+      ${item.next?`<div class="list-item-body"><b>明日:</b><br>${escapeHtml(item.next)}</div>`:''}
+      <div style="text-align:right;margin-top:6px"><button class="delete-btn" onclick="deleteStudyReport('${item.id}')">×</button></div>
+    </div>
+  `;
+}
+function addStudyReport() {
+  const topic = document.getElementById('srTopic').value.trim();
+  const duration = document.getElementById('srDuration').value;
+  const learned = document.getElementById('srLearned').value.trim();
+  const difficulty = document.getElementById('srDifficulty').value.trim();
+  const next = document.getElementById('srNext').value.trim();
+  const level = document.getElementById('srLevel').value;
+  if (!topic) { toast('请填写学习主题'); return; }
+  const list = getPageData('studyReport');
+  list.push({ id: uid(), topic, duration, learned, difficulty, next, level, date: todayStr() });
+  setPageData('studyReport', list);
+  renderPage();
+  toast('汇报已提交');
+}
+function deleteStudyReport(id) {
+  let list = getPageData('studyReport');
+  list = list.filter(x => x.id !== id);
+  setPageData('studyReport', list);
+  renderPage();
+}
+
+// ---------- 9. 心情日记 ----------
+RENDERERS.mood = function() {
+  const list = getPageData('mood');
+  const moods = ['😄','🙂','😐','😔','😢','😡','😰','🥰'];
+  const recent = list.slice(-7).reverse();
+  // 本周平均心情
+  const moodScore = {'😄':5,'🥰':5,'🙂':4,'😐':3,'😔':2,'😢':1,'😡':1,'😰':2};
+  const weekAvg = recent.length ? (recent.reduce((s,x)=>s+(moodScore[x.mood]||3),0)/recent.length).toFixed(1) : '—';
+  return `
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-num">${list.length}</div><div class="stat-label">日记总数</div></div>
+      <div class="stat-card"><div class="stat-num">${weekAvg}</div><div class="stat-label">近7日均分</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">今日心情 · ${todayStr()}</div>
+      <label class="label">现在的心情</label>
+      <div class="mood-picker" id="moodPicker">
+        ${moods.map(m=>`<div class="mood-option" data-mood="${m}" onclick="selectMood('${m}')">${m}</div>`).join('')}
+      </div>
+      <input type="hidden" id="moodVal">
+      <div style="margin-top:16px"><label class="label">心情日记</label><textarea class="textarea" id="moodText" placeholder="今天发生了什么?有什么想说的..." style="min-height:120px"></textarea></div>
+      <div style="margin-top:12px"><label class="label">天气</label>
+        <select class="select" id="moodWeather">
+          <option>☀️ 晴</option><option>⛅ 多云</option><option>☁️ 阴</option><option>🌧️ 雨</option><option>⛈️ 雷雨</option><option>❄️ 雪</option><option>🌫️ 雾</option>
+        </select>
+      </div>
+      <div style="margin-top:12px"><button class="btn" onclick="addMood()">记录今天</button></div>
+    </div>
+    <div class="card">
+      <div class="card-title">心情轨迹</div>
+      <div id="moodList">${renderList(recent, renderMoodItem)}</div>
+    </div>
+  `;
+};
+function renderMoodItem(item) {
+  return `
+    <div class="list-item">
+      <div style="font-size:32px">${item.mood}</div>
+      <div class="list-item-content">
+        <div class="list-item-title">${item.date} <span class="tag">${escapeHtml(item.weather||'')}</span></div>
+        ${item.text?`<div class="list-item-body">${escapeHtml(item.text)}</div>`:''}
+      </div>
+      <button class="delete-btn" onclick="deleteMood('${item.id}')">×</button>
+    </div>
+  `;
+}
+function selectMood(m) {
+  document.getElementById('moodVal').value = m;
+  document.querySelectorAll('#moodPicker .mood-option').forEach(el => {
+    el.classList.toggle('selected', el.dataset.mood === m);
+  });
+}
+function addMood() {
+  const mood = document.getElementById('moodVal').value;
+  const text = document.getElementById('moodText').value.trim();
+  const weather = document.getElementById('moodWeather').value;
+  if (!mood) { toast('请选择心情'); return; }
+  const list = getPageData('mood');
+  list.push({ id: uid(), mood, text, weather, date: todayStr() });
+  setPageData('mood', list);
+  renderPage();
+  toast('已记录今天的心情');
+}
+function deleteMood(id) {
+  let list = getPageData('mood');
+  list = list.filter(x => x.id !== id);
+  setPageData('mood', list);
+  renderPage();
+}
+
+// ---------- 10. 周复盘 ----------
+RENDERERS.weekReview = function() {
+  const list = getPageData('weekReview');
+  // 获取本周日期范围
+  const now = new Date();
+  const weekStart = new Date(now);
+  weekStart.setDate(now.getDate() - now.getDay());
+  weekStart.setHours(0,0,0,0);
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate()+6);
+  const weekLabel = `${weekStart.getMonth()+1}月${weekStart.getDate()}日 - ${weekEnd.getMonth()+1}月${weekEnd.getDate()}日`;
+  return `
+    <div class="card">
+      <div class="card-title">周复盘 · ${weekLabel}</div>
+      <div class="grid-2">
+        <div><label class="label">本周主题/关键词</label><input class="input" id="wkTheme" placeholder="一个词概括这周"></div>
+        <div><label class="label">周评分 (1-10)</label><input class="input" id="wkScore" type="number" min="1" max="10" value="7"></div>
+      </div>
+      <div style="margin-top:12px"><label class="label">本周目标回顾</label><textarea class="textarea" id="wkGoals" placeholder="上周定的目标完成得怎样?"></textarea></div>
+      <div style="margin-top:12px"><label class="label">关键成果 & 高光时刻</label><textarea class="textarea" id="wkWins" placeholder="这周最值得骄傲的事..."></textarea></div>
+      <div style="margin-top:12px"><label class="label">遗憾 & 反思</label><textarea class="textarea" id="wkRegrets" placeholder="哪些没做好?为什么?"></textarea></div>
+      <div style="margin-top:12px"><label class="label">成长与收获</label><textarea class="textarea" id="wkGrowth" placeholder="学到了什么?有什么新认知?"></textarea></div>
+      <div style="margin-top:12px"><label class="label">下周计划</label><textarea class="textarea" id="wkNext" placeholder="下周要聚焦什么?"></textarea></div>
+      <div style="margin-top:12px"><button class="btn" onclick="addWeekReview()">保存周复盘</button></div>
+    </div>
+    <div class="card">
+      <div class="card-title">周复盘档案</div>
+      <div id="wkList">${renderList(list, renderWeekItem)}</div>
+    </div>
+  `;
+};
+function renderWeekItem(item) {
+  return `
+    <div class="list-item" style="flex-direction:column;align-items:stretch">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div>
+          <span class="list-item-title">${escapeHtml(item.theme||'周复盘')}</span>
+          <div class="list-item-meta">${item.date}</div>
+        </div>
+        <span class="tag tag-dark">${escapeHtml(item.score||'')}/10</span>
+      </div>
+      ${item.goals?`<div class="list-item-body"><b>目标回顾:</b><br>${escapeHtml(item.goals)}</div>`:''}
+      ${item.wins?`<div class="list-item-body"><b>高光时刻:</b><br>${escapeHtml(item.wins)}</div>`:''}
+      ${item.regrets?`<div class="list-item-body"><b>遗憾反思:</b><br>${escapeHtml(item.regrets)}</div>`:''}
+      ${item.growth?`<div class="list-item-body"><b>成长收获:</b><br>${escapeHtml(item.growth)}</div>`:''}
+      ${item.next?`<div class="list-item-body"><b>下周计划:</b><br>${escapeHtml(item.next)}</div>`:''}
+      <div style="text-align:right;margin-top:6px"><button class="delete-btn" onclick="deleteWeekReview('${item.id}')">×</button></div>
+    </div>
+  `;
+}
+function addWeekReview() {
+  const theme = document.getElementById('wkTheme').value.trim();
+  const score = document.getElementById('wkScore').value;
+  const goals = document.getElementById('wkGoals').value.trim();
+  const wins = document.getElementById('wkWins').value.trim();
+  const regrets = document.getElementById('wkRegrets').value.trim();
+  const growth = document.getElementById('wkGrowth').value.trim();
+  const next = document.getElementById('wkNext').value.trim();
+  if (!theme && !goals) { toast('请至少填写主题或目标回顾'); return; }
+  const list = getPageData('weekReview');
+  list.push({ id: uid(), theme, score, goals, wins, regrets, growth, next, date: todayStr() });
+  setPageData('weekReview', list);
+  renderPage();
+  toast('周复盘已保存');
+}
+function deleteWeekReview(id) {
+  let list = getPageData('weekReview');
+  list = list.filter(x => x.id !== id);
+  setPageData('weekReview', list);
+  renderPage();
+}
+
+// ==================== 工具函数 ====================
+function escapeHtml(str) {
+  if (str == null) return '';
+  return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ==================== 导入导出 ====================
+function exportData() {
+  const data = loadData();
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `星澈工作台_${todayStr()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('已导出全部数据');
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (confirm('导入会覆盖当前所有数据,确定继续吗?')) {
+        saveData(data);
+        renderPage();
+        toast('导入成功');
+      }
+    } catch(err) {
+      toast('文件格式错误');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ==================== PWA 注册 ====================
+if ('serviceWorker' in navigator) {
+  // 使用内联 service worker (通过 Blob)
+  const swCode = `
+    const CACHE = 'xingche-v1';
+    self.addEventListener('install', e => self.skipWaiting());
+    self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+    self.addEventListener('fetch', e => {
+      e.respondWith(
+        caches.match(e.request).then(r => r || fetch(e.request).then(res => {
+          if (res && res.status === 200 && e.request.method === 'GET') {
+            const clone = res.clone();
+            caches.open(CACHE).then(c => c.put(e.request, clone));
+          }
+          return res;
+        }).catch(() => caches.match(e.request)))
+      );
+    });
+  `;
+  const swBlob = new Blob([swCode], {type:'application/javascript'});
+  const swUrl = URL.createObjectURL(swBlob);
+  // 注意:某些浏览器不允许 blob SW,这里做容错
+  navigator.serviceWorker.register(swUrl).catch(()=>{});
+}
+
+// 提示添加到桌面
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  setTimeout(() => {
+    if (!localStorage.getItem('pwa_prompted')) {
+      toast('💡 点击顶部"添加到主屏幕"可装到手机桌面');
+      localStorage.setItem('pwa_prompted', '1');
+    }
+  }, 3000);
+});
+
+// ==================== 初始化 ====================
+initLifeList();
+renderNav();
+renderPage();
+
+// iOS 双击缩放禁止
+let lastTouch = 0;
+document.addEventListener('touchend', e => {
+  const now = Date.now();
+  if (now - lastTouch < 300) e.preventDefault();
+  lastTouch = now;
+}, { passive: false });
+</script>
+</body>
+</html>
