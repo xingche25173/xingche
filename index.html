@@ -527,7 +527,7 @@ input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18p
 
 <script>
 // ==================== 数据层 ====================
-const STORAGE_KEY = 'xingche_workbench_v2';  // 升级版本号,强制刷新数据
+const STORAGE_KEY = 'xingche_workbench_v3';  // 升级v3:强制刷新数据+每日任务汇总
 
 function loadData() {
   try {
@@ -554,7 +554,7 @@ function initLifeList() {
   const existing = getPageData('lifeList');
   if (existing.length > 0) {
     // 检查是否有被误删的预设目标(如存款50w),自动补回
-    const presetTexts = ['存款 50w','月入三万,交社保','培养输出型爱好,雅思 6.5','保持在 96 斤','情绪稳定','晚上 11 点睡觉','穿有气质的衣服','妆容精致,会画眼妆','找个喜欢的人谈恋爱','出国玩','学会游泳','学会开车'];
+    const presetTexts = ['存款 50w','月入三万,交社保','培养输出型爱好,雅思 6.5','减到 96 斤','情绪稳定','晚上 11 点睡觉','穿有气质的衣服','妆容精致,会画眼妆','找个喜欢的人谈恋爱','出国玩','学会游泳','学会开车'];
     const existingTexts = existing.map(x => x.text);
     let needFix = false;
     presetTexts.forEach(t => {
@@ -733,7 +733,7 @@ function renderGoalDetail(goalId) {
   // 每日分解任务
   const dailyTasks = goal.dailyTasks || [];
   // 今日完成状态
-  const todayDone = getPageData('goalDailyDone')[goalId] || {};
+  const todayDone = getTodayDone(goalId);
   const todayDoneCount = dailyTasks.filter(t => todayDone[t.id]).length;
   const allDone = dailyTasks.length > 0 && todayDoneCount === dailyTasks.length;
 
@@ -865,6 +865,23 @@ function deleteDailyTask(goalId, taskId) {
   toast('已删除');
 }
 
+// 读取某目标今日任务完成状态 { taskId: true }
+function getTodayDone(goalId) {
+  const allDone = getPageData('goalDailyDone');
+  const today = todayStr();
+  if (allDone[today] && allDone[today][goalId]) return allDone[today][goalId];
+  return {};
+}
+
+// 写入某目标今日任务完成状态
+function setTodayDone(goalId, done) {
+  const allDone = getPageData('goalDailyDone');
+  const today = todayStr();
+  if (!allDone[today]) allDone[today] = {};
+  allDone[today][goalId] = done;
+  setPageData('goalDailyDone', allDone);
+}
+
 // 勾选/取消每日任务
 function toggleGoalDaily(goalId, taskId) {
   const goals = getPageData('lifeList');
@@ -873,16 +890,14 @@ function toggleGoalDaily(goalId, taskId) {
   const task = (goal.dailyTasks || []).find(t => t.id === taskId);
   if (!task) return;
 
-  // 读取今日完成状态
-  const allDone = getPageData('goalDailyDone');
-  const done = allDone[goalId] || {};
+  // 读取今日完成状态(按日期隔离,每天自动重置)
+  const done = getTodayDone(goalId);
   const wasDone = !!done[taskId];
 
   if (!wasDone) {
     // 完成 → 加进度
     done[taskId] = true;
-    allDone[goalId] = done;
-    setPageData('goalDailyDone', allDone);
+    setTodayDone(goalId, done);
 
     const oldProgress = goal.progress || 0;
     const newProgress = Math.min(100, oldProgress + (task.reward || 1));
@@ -898,8 +913,7 @@ function toggleGoalDaily(goalId, taskId) {
   } else {
     // 取消完成 → 扣进度
     done[taskId] = false;
-    allDone[goalId] = done;
-    setPageData('goalDailyDone', allDone);
+    setTodayDone(goalId, done);
 
     const oldProgress = goal.progress || 0;
     const newProgress = Math.max(0, oldProgress - (task.reward || 1));
@@ -1132,6 +1146,66 @@ function startCountdownTimer() {
   }, 1000);
 }
 
+// ---------- 今日目标打卡汇总(把所有目标的每日任务集中显示) ----------
+function renderTodayGoalTasks() {
+  const goals = getPageData('lifeList');
+  const activeGoals = goals.filter(g => !g.done && g.dailyTasks && g.dailyTasks.length > 0);
+  if (activeGoals.length === 0) return '';
+
+  let totalTasks = 0, doneTasks = 0;
+
+  // 统计总完成情况
+  activeGoals.forEach(g => {
+    const done = getTodayDone(g.id);
+    g.dailyTasks.forEach(t => {
+      totalTasks++;
+      if (done[t.id]) doneTasks++;
+    });
+  });
+  const todayPct = totalTasks ? Math.round(doneTasks / totalTasks * 100) : 0;
+
+  // 按目标分组渲染
+  const goalSections = activeGoals.map(g => {
+    const done = getTodayDone(g.id);
+    const tasks = g.dailyTasks;
+    const gDone = tasks.filter(t => done[t.id]).length;
+    const gPct = tasks.length ? Math.round(gDone / tasks.length * 100) : 0;
+    const gAllDone = gDone === tasks.length;
+
+    return `
+      <div style="margin-bottom:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding:6px 10px;background:${gAllDone?'#E8F5E9':'#F1F8E9'};border-radius:8px">
+          <div style="font-size:14px;font-weight:700;color:var(--accent)">🎯 ${escapeHtml(g.text)}</div>
+          <div style="font-size:12px;color:var(--text-muted);font-weight:600">${gDone}/${tasks.length}</div>
+        </div>
+        ${tasks.map(t => `
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px dashed var(--border-soft)">
+            <div class="checkbox ${done[t.id]?'checked':''}" onclick="toggleGoalDaily('${g.id}','${t.id}')" style="width:20px;height:20px"></div>
+            <div style="flex:1;font-size:14px;color:var(--text-primary);${done[t.id]?'text-decoration:line-through;opacity:0.5':''}">${escapeHtml(t.text)}</div>
+            <span style="font-size:11px;padding:2px 7px;border-radius:10px;background:#E8F5E9;color:#2E7D32;font-weight:600;white-space:nowrap">+${t.reward||1}%</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <div class="card">
+      <div class="card-title">✅ 今日目标打卡 · ${todayStr()}</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <div class="progress-bar" style="flex:1;height:8px"><div class="progress-fill" style="width:${todayPct}%"></div></div>
+        <span style="font-size:13px;color:var(--text-muted);font-weight:600">${doneTasks}/${totalTasks}</span>
+      </div>
+      ${doneTasks === totalTasks && totalTasks > 0 ? `
+        <div style="text-align:center;padding:10px;background:#E8F5E9;border-radius:8px;margin-bottom:12px;color:var(--success);font-weight:600">🎉 今日全部完成!太棒了</div>
+      ` : `
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px">勾选完成的任务,自动推进对应目标进度</div>
+      `}
+      ${goalSections}
+    </div>
+  `;
+}
+
 // ---------- 1. 每日计划 ----------
 RENDERERS.plan = function() {
   const list = getPageData('plan');
@@ -1141,6 +1215,7 @@ RENDERERS.plan = function() {
   const pct = total ? Math.round(done/total*100) : 0;
   return `
     ${renderCountdown()}
+    ${renderTodayGoalTasks()}
     <div class="card" style="background:linear-gradient(135deg,#E8F5E9,#C8E6C9);border:1px solid var(--border)">
       <div style="font-size:18px;font-weight:700;color:var(--accent);margin-bottom:6px">${getDailyQuote()}</div>
       <div style="font-size:13px;color:var(--text-secondary)">每一步都在成为更好的自己</div>
