@@ -716,6 +716,8 @@ function renderPage() {
     content.innerHTML = renderer ? renderer() : '<div class="empty">页面建设中</div>';
   }
   if (typeof AFTER_RENDER[currentPage] === 'function') AFTER_RENDER[currentPage]();
+  // 启动30岁倒计时实时刷新
+  if (document.getElementById('cdDays')) startCountdownTimer();
 }
 
 // 渲染目标详情页
@@ -1066,6 +1068,70 @@ function toast(msg) {
 const RENDERERS = {};
 const AFTER_RENDER = {};
 
+// ---------- 30岁倒计时 ----------
+function renderCountdown() {
+  const birthday = new Date('2027-01-25T00:00:00');
+  const now = new Date();
+  const diff = birthday - now;
+  const days = Math.max(0, Math.floor(diff / 86400000));
+  const hours = Math.max(0, Math.floor((diff % 86400000) / 3600000));
+  const mins = Math.max(0, Math.floor((diff % 3600000) / 60000));
+  const secs = Math.max(0, Math.floor((diff % 60000) / 1000));
+
+  // 人生清单总进度
+  const goals = getPageData('lifeList');
+  const active = goals.filter(g => !g.done);
+  const totalProgress = goals.length ? goals.reduce((s,g) => s + (g.progress||0), 0) : 0;
+  const maxProgress = goals.length * 100;
+  const overallPct = maxProgress ? Math.round(totalProgress / maxProgress * 100) : 0;
+  const doneCount = goals.length - active.length;
+
+  return `
+    <div class="card" style="background:linear-gradient(135deg,#1B5E20,#2E7D32);color:#fff;border:none;overflow:hidden;position:relative">
+      <div style="position:absolute;top:-30px;right:-30px;font-size:120px;opacity:0.08">🎂</div>
+      <div style="font-size:13px;letter-spacing:3px;opacity:0.85">距离 30 岁生日</div>
+      <div style="font-size:13px;opacity:0.7;margin-bottom:10px">2027年1月25日</div>
+      <div style="display:flex;align-items:flex-end;gap:6px;margin-bottom:14px">
+        <span id="cdDays" style="font-size:52px;font-weight:800;line-height:1;font-family:var(--font-serif)">${days}</span>
+        <span style="font-size:16px;opacity:0.85;margin-bottom:6px">天</span>
+        <span id="cdHMS" style="font-size:15px;opacity:0.8;margin-bottom:6px;margin-left:8px;font-family:monospace">${String(hours).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}</span>
+      </div>
+      <div style="background:rgba(255,255,255,0.15);border-radius:10px;padding:12px;margin-top:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;opacity:0.85;margin-bottom:6px">
+          <span>人生清单总进度</span>
+          <span>${doneCount}/${goals.length} 完成 · ${overallPct}%</span>
+        </div>
+        <div style="background:rgba(255,255,255,0.2);border-radius:6px;height:8px;overflow:hidden">
+          <div style="background:#A5D6A7;height:100%;width:${overallPct}%;border-radius:6px;transition:width 0.5s"></div>
+        </div>
+      </div>
+      <div style="font-size:12px;opacity:0.7;margin-top:10px;text-align:center">
+        ${days > 0 ? '每一天的打勾,都在靠近想要的自己' : '🎉 今天就是你30岁生日!'}
+      </div>
+    </div>
+  `;
+}
+
+// 倒计时实时刷新(每秒)
+let countdownTimer = null;
+function startCountdownTimer() {
+  if (countdownTimer) clearInterval(countdownTimer);
+  countdownTimer = setInterval(() => {
+    const dEl = document.getElementById('cdDays');
+    const hEl = document.getElementById('cdHMS');
+    if (!dEl || !hEl) return;
+    const birthday = new Date('2027-01-25T00:00:00');
+    const diff = birthday - new Date();
+    if (diff <= 0) { dEl.textContent = '0'; hEl.textContent = '00:00:00'; return; }
+    const days = Math.floor(diff / 86400000);
+    const hours = Math.floor((diff % 86400000) / 3600000);
+    const mins = Math.floor((diff % 3600000) / 60000);
+    const secs = Math.floor((diff % 60000) / 1000);
+    dEl.textContent = days;
+    hEl.textContent = `${String(hours).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+  }, 1000);
+}
+
 // ---------- 1. 每日计划 ----------
 RENDERERS.plan = function() {
   const list = getPageData('plan');
@@ -1074,6 +1140,7 @@ RENDERERS.plan = function() {
   const total = today.length;
   const pct = total ? Math.round(done/total*100) : 0;
   return `
+    ${renderCountdown()}
     <div class="card" style="background:linear-gradient(135deg,#E8F5E9,#C8E6C9);border:1px solid var(--border)">
       <div style="font-size:18px;font-weight:700;color:var(--accent);margin-bottom:6px">${getDailyQuote()}</div>
       <div style="font-size:13px;color:var(--text-secondary)">每一步都在成为更好的自己</div>
