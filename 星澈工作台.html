@@ -8,27 +8,25 @@
 <meta name="apple-mobile-web-app-title" content="星澈">
 <meta name="theme-color" content="#FFD60A">
 <title>星澈 · 工作台</title>
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
-<link rel="manifest" href='/manifest.json'>
+<link rel="manifest" href='data:application/manifest+json,{"name":"星澈工作台","short_name":"星澈","start_url":".","display":"standalone","background_color":"%23FFD60A","theme_color":"%23FFD60A","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 192 192%22%3E%3Crect width=%22192%22 height=%22192%22 fill=%22%23FFD60A%22/%3E%3Ctext x=%2296%22 y=%22130%22 font-size=%22110%22 text-anchor=%22middle%22 fill=%22%23524200%22 font-family=%22serif%22%3E%E6%98%9F%3C/text%3E%3C/svg%3E","sizes":"192x192","type":"image/svg+xml"},{"src":"data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22%3E%3Crect width=%22512%22 height=%22512%22 fill=%22%23FFD60A%22/%3E%3Ctext x=%22256%22 y=%22350%22 font-size=%22290%22 text-anchor=%22middle%22 fill=%22%23524200%22 font-family=%22serif%22%3E%E6%98%9F%3C/text%3E%3C/svg%3E","sizes":"512x512","type":"image/svg+xml"}]}'>
 <style>
-/* ========== 设计系统(绿色主题) ========== */
+/* ========== 设计系统 ========== */
 :root {
-  --bg-primary: #E8F5E9;
-  --bg-secondary: #C8E6C9;
-  --bg-card: #FFFFFF;
-  --bg-card-hover: #F1F8E9;
-  --text-primary: #1B5E20;
-  --text-secondary: #388E3C;
-  --text-muted: #66BB6A;
-  --accent: #2E7D32;
-  --accent-soft: #1B5E20;
-  --border: #A5D6A7;
-  --border-soft: #C8E6C9;
+  --bg-primary: #FFD60A;
+  --bg-secondary: #FFE564;
+  --bg-card: #FFFEF5;
+  --bg-card-hover: #FFF8C4;
+  --text-primary: #2D2200;
+  --text-secondary: #5C4D00;
+  --text-muted: #8A7300;
+  --accent: #1A1A1A;
+  --accent-soft: #2D2200;
+  --border: #E8C500;
+  --border-soft: #F0D640;
   --danger: #C0392B;
-  --success: #2E7D32;
-  --shadow: rgba(27, 94, 32, 0.08);
-  --shadow-strong: rgba(27, 94, 32, 0.15);
+  --success: #27AE60;
+  --shadow: rgba(82, 66, 0, 0.12);
+  --shadow-strong: rgba(82, 66, 0, 0.2);
   --radius: 14px;
   --radius-sm: 8px;
   --sidebar-w: 240px;
@@ -430,19 +428,6 @@ body { min-height: 100vh; }
 .progress-bar { width: 100%; height: 8px; background: var(--border-soft); border-radius: 4px; overflow: hidden; }
 .progress-fill { height: 100%; background: var(--accent); border-radius: 4px; transition: width 0.3s; }
 
-/* 滑块美化 */
-input[type="range"] { -webkit-appearance: none; height: 6px; background: var(--border-soft); border-radius: 3px; outline: none; }
-input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 2px solid var(--bg-card); box-shadow: 0 1px 4px var(--shadow); }
-
-/* 分类标签按钮 */
-.tag-btn {
-  display:inline-block;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600;
-  background:var(--bg-card);color:var(--text-secondary);border:1px solid var(--border);
-  cursor:pointer;user-select:none;transition:all 0.15s;
-}
-.tag-btn:active { transform:scale(0.95); }
-.tag-btn.active { background:var(--accent);color:#fff;border-color:var(--accent); }
-
 /* 遮罩 */
 .overlay {
   display: none;
@@ -549,79 +534,28 @@ function setPageData(page, arr) {
 }
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 
-// 首次启动时初始化「人生清单」预设数据
-function initLifeList() {
-  const existing = getPageData('lifeList');
-  if (existing.length > 0) {
-    // 检查是否有被误删的预设目标(如存款50w),自动补回
-    const presetTexts = ['存款 50w','月入三万,交社保','培养输出型爱好,雅思 6.5','保持在 96 斤','情绪稳定','晚上 11 点睡觉','穿有气质的衣服','妆容精致,会画眼妆','找个喜欢的人谈恋爱','出国玩','学会游泳','学会开车'];
-    const existingTexts = existing.map(x => x.text);
-    let needFix = false;
-    presetTexts.forEach(t => {
-      if (!existingTexts.includes(t)) {
-        // 找到对应预设并补回
-        const presets = getLifeListPresets();
-        const preset = presets.find(p => p.text === t);
-        if (preset) {
-          existing.push({ id: uid(), date: todayStr(), ...preset });
-          needFix = true;
-        }
-      }
-    });
-    if (needFix) {
-      setPageData('lifeList', existing);
-    }
-    return;
-  }
-  const presets = getLifeListPresets();
-  // 保持图片原始顺序,进行中的在前,已完成的在后
-  const list = presets.map(p => ({ id: uid(), date: todayStr(), ...p }));
-  setPageData('lifeList', list);
-}
-function getLifeListPresets() {
-  return [
-    { text: '存款 50w', category: '财务', deadline: '2027-01-26', note: '已存 27w', progress: 54, currentValue: '27w', targetValue: '50w', done: false },
-    { text: '月入三万,交社保', category: '事业', deadline: '', note: '', progress: 0, currentValue: '', targetValue: '月入3w', done: false },
-    { text: '培养输出型爱好,雅思 6.5', category: '学习', deadline: '2027-01-26', note: '', progress: 0, currentValue: '', targetValue: '雅思6.5', done: false },
-    { text: '保持在 96 斤', category: '健康', deadline: '2027-01-26', note: '', progress: 0, currentValue: '', targetValue: '96斤', done: false },
-    { text: '情绪稳定', category: '健康', deadline: '', note: '', progress: 0, currentValue: '', targetValue: '', done: false },
-    { text: '晚上 11 点睡觉', category: '健康', deadline: '', note: '', progress: 0, currentValue: '', targetValue: '23:00', done: false },
-    { text: '穿有气质的衣服', category: '形象', deadline: '', note: '', progress: 0, currentValue: '', targetValue: '', done: false },
-    { text: '妆容精致,会画眼妆', category: '形象', deadline: '', note: '', progress: 0, currentValue: '', targetValue: '', done: false },
-    { text: '找个喜欢的人谈恋爱', category: '情感', deadline: '2027-01-26', note: '', progress: 0, currentValue: '', targetValue: '', done: false },
-    { text: '出国玩', category: '体验', deadline: '', note: '✅ 已去了泰国', progress: 100, currentValue: '泰国', targetValue: '', done: true },
-    { text: '学会游泳', category: '健康', deadline: '', note: '', progress: 100, currentValue: '', targetValue: '', done: true },
-    { text: '学会开车', category: '体验', deadline: '', note: '', progress: 100, currentValue: '', targetValue: '', done: true },
-  ];
-}
-
 // ==================== 导航 ====================
-// 侧边栏:每日计划 + 人生清单的每个目标(动态生成)
-let PAGES = [{ id: 'plan', name: '每日计划', icon: '📋' }];
-
-function rebuildPages() {
-  initLifeList();
-  const goals = getPageData('lifeList');
-  PAGES = [{ id: 'plan', name: '每日计划', icon: '📋' }];
-  goals.forEach((g, i) => {
-    PAGES.push({
-      id: 'goal_' + g.id,
-      name: g.text,
-      icon: g.done ? '✅' : '🎯',
-      goalId: g.id,
-    });
-  });
-}
+const PAGES = [
+  { id: 'plan',         name: '每日计划',     icon: '📋' },
+  { id: 'inspiration',  name: '选题每日灵感', icon: '💡' },
+  { id: 'workReview',   name: '工作复盘',     icon: '🔧' },
+  { id: 'lifeReview',   name: '生活复盘',     icon: '🌿' },
+  { id: 'reading',      name: '读书笔记',     icon: '📖' },
+  { id: 'quotes',       name: '好句笔记',     icon: '✨' },
+  { id: 'exercise',     name: '运动打卡',     icon: '🏃' },
+  { id: 'studyReport',  name: '每日学习汇报', icon: '🎓' },
+  { id: 'mood',         name: '心情日记',     icon: '🌙' },
+  { id: 'weekReview',   name: '周复盘',       icon: '📅' },
+];
 
 let currentPage = 'plan';
 
 function renderNav() {
-  rebuildPages();
   const nav = document.getElementById('nav');
   nav.innerHTML = PAGES.map((p, i) => `
     <li class="nav-item ${p.id === currentPage ? 'active' : ''}" onclick="navigate('${p.id}')">
       <span class="nav-num">${i+1}</span>
-      <span class="nav-label">${p.icon} ${p.name}</span>
+      <span class="nav-label">${p.name}</span>
     </li>
   `).join('');
 }
@@ -646,197 +580,14 @@ function toggleSidebar(force) {
 
 // ==================== 页面渲染分发 ====================
 function renderPage() {
-  rebuildPages();
   const page = PAGES.find(p => p.id === currentPage);
-  if (!page) { currentPage = 'plan'; return renderPage(); }
   document.getElementById('pageTitle').textContent = page.name;
   document.getElementById('pageDate').textContent = formatDate(new Date());
   const content = document.getElementById('content');
-  // 如果是目标详情页
-  if (currentPage.startsWith('goal_') && page.goalId) {
-    content.innerHTML = renderGoalDetail(page.goalId);
-  } else {
-    const renderer = RENDERERS[currentPage];
-    content.innerHTML = renderer ? renderer() : '<div class="empty">页面建设中</div>';
-  }
+  const renderer = RENDERERS[currentPage];
+  content.innerHTML = renderer ? renderer() : '<div class="empty">页面建设中</div>';
+  // 渲染后执行钩子
   if (typeof AFTER_RENDER[currentPage] === 'function') AFTER_RENDER[currentPage]();
-}
-
-// 渲染目标详情页
-function renderGoalDetail(goalId) {
-  const goals = getPageData('lifeList');
-  const goal = goals.find(g => g.id === goalId);
-  if (!goal) return '<div class="empty">目标不存在</div>';
-  const progress = goal.done ? 100 : (goal.progress || 0);
-  const allPlans = getPageData('plan');
-  const relatedPlans = allPlans.filter(p => p.goalId === goalId);
-  const todayPlans = relatedPlans.filter(p => p.date === todayStr());
-  const doneToday = todayPlans.filter(p => p.done).length;
-
-  // 获取该目标最近7天的打卡记录
-  const checkins = goal.checkins || [];
-
-  let barColor = 'var(--accent)';
-  if (progress >= 100) barColor = 'var(--success)';
-  else if (progress >= 50) barColor = '#27AE60';
-
-  const valueDisplay = (goal.currentValue || goal.targetValue) ?
-    `<span style="font-size:14px;color:var(--text-muted)">${escapeHtml(goal.currentValue||'？')} → ${escapeHtml(goal.targetValue||'？')}</span>` : '';
-
-  return `
-    <div class="card" style="background:linear-gradient(135deg,#E8F5E9,#C8E6C9);border:1px solid var(--border)">
-      <div style="font-size:20px;font-weight:700;color:var(--accent);margin-bottom:6px">${goal.done ? '✅' : '🎯'} ${escapeHtml(goal.text)}</div>
-      <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
-        <span style="font-size:32px;font-weight:800;color:${barColor}">${progress}%</span>
-        ${valueDisplay}
-      </div>
-      <div class="progress-bar" style="height:14px;margin-top:10px"><div class="progress-fill" style="width:${progress}%;background:${barColor}"></div></div>
-      <div style="font-size:12px;color:var(--text-muted);margin-top:6px">
-        ${escapeHtml(goal.category||'其他')} · ${goal.deadline?'截止 '+goal.deadline:'无截止日期'} · ${goal.done?'已完成':'进行中'}
-      </div>
-      ${goal.note?`<div style="margin-top:8px;font-size:13px;color:var(--text-secondary)">📝 ${escapeHtml(goal.note)}</div>`:''}
-    </div>
-
-    <div class="stat-grid">
-      <div class="stat-card"><div class="stat-num">${todayPlans.length}</div><div class="stat-label">今日任务</div></div>
-      <div class="stat-card"><div class="stat-num">${doneToday}</div><div class="stat-label">今日完成</div></div>
-      <div class="stat-card"><div class="stat-num">${checkins.length}</div><div class="stat-label">打卡次数</div></div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">为这个目标添加今日任务</div>
-      <div><label class="label">📝 任务内容</label><input class="input" id="goalPlanInput" placeholder="如:存1000元" onkeydown="if(event.key==='Enter')addGoalPlan('${goalId}')"></div>
-      <div style="display:flex;gap:10px;margin-top:10px">
-        <div style="flex:1"><label class="label">⏰ 时间</label><input class="input" id="goalPlanTime" type="time" value="09:00"></div>
-        <div style="width:100px"><label class="label">完成奖励进度</label><input class="input" id="goalPlanReward" type="number" min="0" max="20" value="2" style="text-align:center"></div>
-      </div>
-      <div style="margin-top:12px"><button class="btn" onclick="addGoalPlan('${goalId}')" style="width:100%">添加任务</button></div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">今日任务 · ${todayStr()}</div>
-      ${todayPlans.length === 0 ? '<div class="empty"><div class="empty-icon">🌱</div>今天还没有为这个目标安排任务</div>' :
-      `<div>${todayPlans.sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99')).map(item => renderGoalPlanItem(item, goalId)).join('')}</div>`}
-    </div>
-
-    <div class="card">
-      <div class="card-title">打卡记录</div>
-      ${checkins.length === 0 ? '<div class="empty">还没有打卡记录</div>' :
-      `<div>${checkins.slice(-10).reverse().map(c => `
-        <div class="list-item">
-          <div class="list-item-content">
-            <div class="list-item-title">+${c.add}% → ${c.total}%</div>
-            <div class="list-item-meta">${c.date} ${c.time||''}</div>
-          </div>
-        </div>
-      `).join('')}</div>`}
-    </div>
-
-    <div class="card">
-      <div style="display:flex;gap:8px">
-        ${!goal.done ? `<button class="btn" onclick="checkinLifeList('${goalId}')">📅 快速打卡</button>` : ''}
-        <button class="btn btn-outline" onclick="editLifeListProgress('${goalId}')">修改进度</button>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">历史任务</div>
-      ${relatedPlans.filter(p=>p.date!==todayStr()).slice(-10).reverse().map(item => renderGoalPlanItem(item, goalId)).join('') || '<div class="empty">暂无</div>'}
-    </div>
-  `;
-}
-
-function renderGoalPlanItem(item, goalId) {
-  const catColors = {
-    '饮食': {bg:'#FFE0B2',color:'#E65100'},
-    '运动': {bg:'#C8E6C9',color:'#1B5E20'},
-    '学习': {bg:'#BBDEFB',color:'#0D47A1'},
-    '工作': {bg:'#F8BBD0',color:'#880E4F'},
-    '生活': {bg:'#F0F4C3',color:'#827717'},
-    '护理': {bg:'#F8BBD0',color:'#AD1457'},
-    '其他': {bg:'#E0E0E0',color:'#424242'},
-  };
-  const cat = catColors[item.category || '其他'] || catColors['其他'];
-  return `
-    <div style="display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px dashed var(--border-soft)">
-      <div style="font-family:monospace;font-size:13px;color:var(--text-secondary);min-width:42px;font-weight:600">${item.time||'—:—'}</div>
-      <div class="checkbox ${item.done?'checked':''}" onclick="toggleGoalPlan('${item.id}','${goalId}')" style="width:18px;height:18px"></div>
-      <div style="font-size:18px;flex-shrink:0">${item.emoji||'📌'}</div>
-      <div style="flex:1;font-size:14px;color:var(--text-primary);${item.done?'text-decoration:line-through;opacity:0.6':''}">${escapeHtml(item.text)}</div>
-      ${item.reward?`<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:#E8F5E9;color:#2E7D32;font-weight:600">+${item.reward}%</span>`:''}
-      <button onclick="deleteGoalPlan('${item.id}','${goalId}')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:16px;padding:0 4px">×</button>
-    </div>
-  `;
-}
-
-// 添加关联目标的任务
-function addGoalPlan(goalId) {
-  const input = document.getElementById('goalPlanInput');
-  const timeInput = document.getElementById('goalPlanTime');
-  const rewardInput = document.getElementById('goalPlanReward');
-  const text = input.value.trim();
-  if (!text) { toast('请填写任务内容'); return; }
-  const list = getPageData('plan');
-  list.push({
-    id: uid(),
-    text,
-    done: false,
-    date: todayStr(),
-    time: timeInput.value || '',
-    emoji: '📌',
-    category: '其他',
-    goalId: goalId,
-    reward: parseInt(rewardInput.value) || 0,
-  });
-  setPageData('plan', list);
-  input.value = '';
-  renderPage();
-  toast('已添加任务');
-}
-
-// 勾选关联目标的任务 → 自动给目标加进度
-function toggleGoalPlan(planId, goalId) {
-  const list = getPageData('plan');
-  const item = list.find(x => x.id === planId);
-  if (!item) return;
-  const wasDone = item.done;
-  item.done = !wasDone;
-  setPageData('plan', list);
-
-  // 如果是完成动作,且有奖励进度,自动给目标加进度
-  if (item.done && !wasDone && item.reward && item.reward > 0) {
-    const goals = getPageData('lifeList');
-    const goal = goals.find(g => g.id === goalId);
-    if (goal && !goal.done) {
-      const oldProgress = goal.progress || 0;
-      goal.progress = Math.min(100, oldProgress + item.reward);
-      if (!goal.checkins) goal.checkins = [];
-      goal.checkins.push({ date: todayStr(), time: new Date().toTimeString().slice(0,5), add: item.reward, total: goal.progress });
-      if (goal.progress >= 100) goal.done = true;
-      setPageData('lifeList', goals);
-      if (goal.progress >= 100) toast('🎉 目标完成!');
-      else toast(`✅ 任务完成!${goal.text} +${item.reward}% → ${goal.progress}%`);
-    }
-  } else if (!item.done && wasDone && item.reward && item.reward > 0) {
-    // 取消完成,扣回进度
-    const goals = getPageData('lifeList');
-    const goal = goals.find(g => g.id === goalId);
-    if (goal && !goal.done) {
-      goal.progress = Math.max(0, (goal.progress || 0) - item.reward);
-      setPageData('lifeList', goals);
-      toast('已取消,进度已扣回');
-    }
-  }
-  renderPage();
-}
-
-function deleteGoalPlan(planId, goalId) {
-  if (!confirm('确定删除这条任务吗?')) return;
-  let list = getPageData('plan');
-  list = list.filter(x => x.id !== planId);
-  setPageData('plan', list);
-  renderPage();
-  toast('已删除');
 }
 
 function formatDate(d) {
@@ -855,12 +606,6 @@ function renderList(arr, renderFn) {
     return `<div class="empty"><div class="empty-icon">🍃</div>暂无记录</div>`;
   }
   return arr.slice().reverse().map(renderFn).join('');
-}
-function renderListKeepOrder(arr, renderFn) {
-  if (!arr || arr.length === 0) {
-    return `<div class="empty"><div class="empty-icon">🍃</div>暂无记录</div>`;
-  }
-  return arr.slice().map(renderFn).join('');
 }
 
 function toast(msg) {
@@ -882,168 +627,49 @@ RENDERERS.plan = function() {
   const total = today.length;
   const pct = total ? Math.round(done/total*100) : 0;
   return `
-    <div class="card" style="background:linear-gradient(135deg,#E8F5E9,#C8E6C9);border:1px solid var(--border)">
-      <div style="font-size:18px;font-weight:700;color:var(--accent);margin-bottom:6px">${getDailyQuote()}</div>
-      <div style="font-size:13px;color:var(--text-secondary)">每一步都在成为更好的自己</div>
-    </div>
     <div class="stat-grid">
       <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">今日任务</div></div>
       <div class="stat-card"><div class="stat-num">${done}</div><div class="stat-label">已完成</div></div>
       <div class="stat-card"><div class="stat-num">${pct}%</div><div class="stat-label">完成率</div></div>
     </div>
     <div class="card">
-      <div class="card-title">今日进度</div>
-      <div style="display:flex;align-items:center;gap:10px">
-        <div class="progress-bar" style="flex:1;height:10px"><div class="progress-fill" style="width:${pct}%"></div></div>
-        <span style="font-size:13px;color:var(--text-muted);font-weight:600">${done}/${total}</span>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">今日任务清单 · ${todayStr()}</div>
-      ${today.length === 0 ? '<div class="empty"><div class="empty-icon">🌿</div>今天还没有安排,往下翻添加任务吧</div>' : renderTimelineGrouped(today)}
-    </div>
-    <div class="card">
       <div class="card-title">添加任务</div>
-      <div><label class="label">📝 任务内容</label><input class="input" id="plInput" placeholder="如:健康早餐" onkeydown="if(event.key==='Enter')addPlan()"></div>
-      <div style="display:flex;gap:10px;margin-top:10px">
-        <div style="flex:1"><label class="label">⏰ 时间</label><input class="input" id="plTime" type="time" value="09:00"></div>
-        <div style="width:70px"><label class="label">图标</label><input class="input" id="plEmoji" placeholder="📌" style="text-align:center" maxlength="2"></div>
+      <div class="row">
+        <input class="input" id="planInput" placeholder="今天要做什么?" onkeydown="if(event.key==='Enter')addPlan()">
+        <button class="btn" onclick="addPlan()">添加</button>
       </div>
-      <div style="margin-top:10px">
-        <label class="label">🏷 分类</label>
-        <div style="display:flex;gap:6px;flex-wrap:wrap" id="plCategoryBtns">
-          <span class="tag-btn active" onclick="selectCategory('饮食',this)">饮食</span>
-          <span class="tag-btn" onclick="selectCategory('运动',this)">运动</span>
-          <span class="tag-btn" onclick="selectCategory('学习',this)">学习</span>
-          <span class="tag-btn" onclick="selectCategory('工作',this)">工作</span>
-          <span class="tag-btn" onclick="selectCategory('生活',this)">生活</span>
-          <span class="tag-btn" onclick="selectCategory('护理',this)">护理</span>
-          <span class="tag-btn" onclick="selectCategory('其他',this)">其他</span>
-        </div>
-        <input type="hidden" id="plCategory" value="饮食">
-      </div>
-      <div style="margin-top:10px">
-        <label class="label">🎯 关联人生目标(可选)</label>
-        <select class="select" id="plGoal">
-          <option value="">— 不关联 —</option>
-          ${getPageData('lifeList').map(g => `<option value="${g.id}">${g.done?'✅':'🎯'} ${escapeHtml(g.text)}</option>`).join('')}
-        </select>
-      </div>
-      <div style="margin-top:10px;display:flex;gap:10px">
-        <div style="flex:1"><label class="label">完成奖励进度</label><input class="input" id="plReward" type="number" min="0" max="20" value="0" placeholder="完成后给目标加多少%"></div>
-      </div>
-      <div style="margin-top:12px"><button class="btn" onclick="addPlan()" style="width:100%">添加任务</button></div>
+    </div>
+    <div class="card">
+      <div class="card-title">今日待办 · ${todayStr()}</div>
+      <div id="planList">${renderList(today, renderPlanItem)}</div>
     </div>
     <div class="card">
       <div class="card-title">历史任务</div>
-      <div>${list.filter(x => x.date !== todayStr()).slice(-20).reverse().map(item => renderTimelineItem(item)).join('') || '<div class="empty">暂无</div>'}</div>
+      <div id="planHistory">${renderList(list.filter(x => x.date !== todayStr()), renderPlanItem)}</div>
     </div>
   `;
 };
-// 按时间段分组渲染
-function renderTimelineGrouped(today) {
-  const groups = [
-    { name: '🌅 早晨', range: '05:00-11:59', items: [] },
-    { name: '☀️ 中午', range: '12:00-13:59', items: [] },
-    { name: '🌤️ 下午', range: '14:00-17:59', items: [] },
-    { name: '🌙 晚上', range: '18:00-23:59', items: [] },
-    { name: '🕒 未安排时间', range: '', items: [] },
-  ];
-  today.forEach(item => {
-    const t = item.time || '';
-    if (!t) { groups[4].items.push(item); return; }
-    const hour = parseInt(t.split(':')[0]);
-    if (hour < 12) groups[0].items.push(item);
-    else if (hour < 14) groups[1].items.push(item);
-    else if (hour < 18) groups[2].items.push(item);
-    else groups[3].items.push(item);
-  });
-  groups.forEach(g => g.items.sort((a,b) => (a.time||'99:99').localeCompare(b.time||'99:99')));
-  return groups.map(g => {
-    if (g.items.length === 0) return '';
-    return `
-      <div style="margin-bottom:16px">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid var(--border)">
-          <span style="font-size:15px;font-weight:700;color:var(--accent)">${g.name}</span>
-          <span style="font-size:11px;color:var(--text-muted)">${g.range}</span>
-          <span style="font-size:11px;color:var(--text-muted);margin-left:auto">${g.items.filter(x=>x.done).length}/${g.items.length}</span>
-        </div>
-        ${g.items.map(item => renderTimelineItem(item)).join('')}
-      </div>
-    `;
-  }).join('');
-}
-function renderTimelineItem(item) {
-  const catColors = {
-    '饮食': {bg:'#FFE0B2',color:'#E65100'},
-    '运动': {bg:'#C8E6C9',color:'#1B5E20'},
-    '学习': {bg:'#BBDEFB',color:'#0D47A1'},
-    '工作': {bg:'#F8BBD0',color:'#880E4F'},
-    '生活': {bg:'#F0F4C3',color:'#827717'},
-    '护理': {bg:'#F8BBD0',color:'#AD1457'},
-    '其他': {bg:'#E0E0E0',color:'#424242'},
-  };
-  const cat = catColors[item.category || '其他'] || catColors['其他'];
+function renderPlanItem(item) {
   return `
-    <div style="display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px dashed var(--border-soft)">
-      <div style="position:relative;width:18px;flex-shrink:0">
-        <div style="position:absolute;left:6px;top:0;bottom:-100%;width:2px;background:var(--border)"></div>
-        <div style="position:absolute;left:3px;top:6px;width:10px;height:10px;border-radius:50%;background:${item.done?'var(--success)':'var(--border)'}"></div>
+    <div class="list-item">
+      <div class="checkbox ${item.done?'checked':''}" onclick="togglePlan('${item.id}')"></div>
+      <div class="list-item-content">
+        <div class="list-item-title ${item.done?'completed-text':''}">${escapeHtml(item.text)}</div>
+        <div class="list-item-meta">${item.date} ${item.time||''}</div>
       </div>
-      <div style="font-family:monospace;font-size:13px;color:var(--text-secondary);min-width:42px;font-weight:600">${item.time||'—:—'}</div>
-      <div class="checkbox ${item.done?'checked':''}" onclick="togglePlan('${item.id}')" style="width:18px;height:18px"></div>
-      <div style="font-size:18px;flex-shrink:0">${item.emoji||'📌'}</div>
-      <div style="flex:1;font-size:14px;color:var(--text-primary);${item.done?'text-decoration:line-through;opacity:0.6':''}">${escapeHtml(item.text)}</div>
-      <span style="font-size:11px;padding:2px 10px;border-radius:12px;background:${cat.bg};color:${cat.color};font-weight:600;flex-shrink:0">${escapeHtml(item.category||'其他')}</span>
-      <button onclick="deletePlan('${item.id}')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:16px;flex-shrink:0;padding:0 4px">×</button>
+      <button class="delete-btn" onclick="deletePlan('${item.id}')">×</button>
     </div>
   `;
 }
-// 每日激励语
-function getDailyQuote() {
-  const quotes = [
-    '你好,今天也要加油哦 🌿',
-    '新的一天,新的可能 ✨',
-    '每一步都在靠近目标 🌱',
-    '今天的努力,是明天的底气 💪',
-    '慢慢来,会比较快 🌿',
-    '别忘了夸夸自己 🌸',
-    '一切都会慢慢变好的 🌻',
-  ];
-  const d = new Date();
-  return quotes[d.getDay()];
-}
 function addPlan() {
-  const input = document.getElementById('plInput');
-  const timeInput = document.getElementById('plTime');
-  const emojiInput = document.getElementById('plEmoji');
-  const categoryInput = document.getElementById('plCategory');
-  const goalInput = document.getElementById('plGoal');
-  const rewardInput = document.getElementById('plReward');
+  const input = document.getElementById('planInput');
   const text = input.value.trim();
-  if (!text) { toast('请填写任务内容'); return; }
+  if (!text) return;
   const list = getPageData('plan');
-  list.push({
-    id: uid(),
-    text,
-    done: false,
-    date: todayStr(),
-    time: timeInput.value || '',
-    emoji: emojiInput.value || '📌',
-    category: categoryInput.value,
-    goalId: goalInput.value || '',
-    reward: parseInt(rewardInput.value) || 0,
-  });
+  list.push({ id: uid(), text, done: false, date: todayStr(), time: new Date().toTimeString().slice(0,5) });
   setPageData('plan', list);
-  input.value = '';
-  emojiInput.value = '';
   renderPage();
   toast('已添加任务');
-}
-function selectCategory(cat, el) {
-  document.getElementById('plCategory').value = cat;
-  document.querySelectorAll('#plCategoryBtns .tag-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
 }
 function togglePlan(id) {
   const list = getPageData('plan');
@@ -1053,7 +679,6 @@ function togglePlan(id) {
   renderPage();
 }
 function deletePlan(id) {
-  if (!confirm('确定删除这条任务吗?')) return;
   let list = getPageData('plan');
   list = list.filter(x => x.id !== id);
   setPageData('plan', list);
@@ -1061,181 +686,7 @@ function deletePlan(id) {
   toast('已删除');
 }
 
-// ---------- 2. 人生清单(目标打卡 + 进度条) ----------
-RENDERERS.lifeList = function() {
-  const list = getPageData('lifeList');
-  const done = list.filter(x => x.done).length;
-  const total = list.length;
-  const pct = total ? Math.round(done/total*100) : 0;
-  // 计算平均进度(基于每个目标的 progress 值)
-  const avgProgress = total ? Math.round(list.reduce((s,x)=>s+(x.progress||0),0)/total) : 0;
-  return `
-    <div class="card" style="background:linear-gradient(135deg,#FFD60A,#FFE564);border:none">
-      <div style="text-align:center;padding:8px 0">
-        <div style="font-size:13px;color:var(--text-secondary);margin-bottom:4px">送给自己的生日礼物</div>
-        <div style="font-size:20px;font-weight:700;color:var(--text-primary);font-family:var(--font-serif);letter-spacing:4px">人生是场体验</div>
-      </div>
-    </div>
-    <div class="stat-grid">
-      <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">总目标</div></div>
-      <div class="stat-card"><div class="stat-num">${done}</div><div class="stat-label">已完成</div></div>
-      <div class="stat-card"><div class="stat-num">${avgProgress}%</div><div class="stat-label">平均进度</div></div>
-    </div>
-    <div class="card">
-      <div class="card-title">总体进度</div>
-      <div class="progress-bar" style="height:12px"><div class="progress-fill" style="width:${avgProgress}%"></div></div>
-      <div style="text-align:right;font-size:12px;color:var(--text-muted);margin-top:4px">${done}/${total} 已完成 · 平均 ${avgProgress}%</div>
-    </div>
-    <div class="card">
-      <div class="card-title">进行中 · ${total-done}</div>
-      <div id="llActiveList">${renderListKeepOrder(list.filter(x=>!x.done), renderLifeListItem)}</div>
-    </div>
-    <div class="card">
-      <div class="card-title">已完成 · ${done}</div>
-      <div id="llDoneList">${renderListKeepOrder(list.filter(x=>x.done), renderLifeListItem)}</div>
-    </div>
-    <div class="card">
-      <div class="card-title">添加新目标</div>
-      <div class="grid-2">
-        <div><label class="label">目标</label><input class="input" id="llText" placeholder="想达成什么?"></div>
-        <div><label class="label">分类</label>
-          <select class="select" id="llCategory">
-            <option>健康</option><option>事业</option><option>学习</option><option>财务</option><option>形象</option><option>情感</option><option>体验</option><option>其他</option>
-          </select>
-        </div>
-      </div>
-      <div class="grid-2" style="margin-top:12px">
-        <div><label class="label">当前进度</label><input class="input" id="llCurrent" type="number" min="0" max="100" placeholder="0-100" value="0"></div>
-        <div><label class="label">截止日期(可选)</label><input class="input" id="llDeadline" type="date"></div>
-      </div>
-      <div class="grid-2" style="margin-top:12px">
-        <div><label class="label">当前值(如:27w)</label><input class="input" id="llCurrentValue" placeholder="如:27w / 5.5分 / 98斤"></div>
-        <div><label class="label">目标值(如:50w)</label><input class="input" id="llTargetValue" placeholder="如:50w / 6.5分 / 96斤"></div>
-      </div>
-      <div style="margin-top:12px"><label class="label">备注</label><input class="input" id="llNote" placeholder="额外说明..."></div>
-      <div style="margin-top:12px"><button class="btn" onclick="addLifeList()">添加目标</button></div>
-    </div>
-  `;
-};
-function renderLifeListItem(item) {
-  const cat = item.category || '其他';
-  const progress = item.progress || 0;
-  const isDone = item.done;
-  const displayProgress = isDone ? 100 : progress;
-  // 进度条颜色:根据进度变化
-  let barColor = 'var(--accent)';
-  if (displayProgress >= 100) barColor = 'var(--success)';
-  else if (displayProgress >= 50) barColor = '#27AE60';
-  const valueDisplay = (item.currentValue || item.targetValue) ?
-    `<span style="font-size:12px;color:var(--text-muted)">${escapeHtml(item.currentValue||'？')} → ${escapeHtml(item.targetValue||'？')}</span>` : '';
-  // 打卡历史
-  const checkinHistory = (item.checkins && item.checkins.length > 0) ?
-    `<div style="margin-top:8px;padding:8px 10px;background:var(--bg-card-hover);border-radius:6px;font-size:11px;color:var(--text-muted)">
-      <b>打卡记录(${item.checkins.length}次):</b><br>
-      ${item.checkins.slice(-3).reverse().map(c => `· ${c.date} ${c.time} +${c.add}% → ${c.total}%`).join('<br>')}
-    </div>` : '';
-  return `
-    <div class="list-item" style="flex-direction:column;align-items:stretch;${isDone?'opacity:0.65':''}">
-      <div style="display:flex;align-items:flex-start;gap:12px;width:100%">
-        <div class="checkbox ${isDone?'checked':''}" onclick="toggleLifeList('${item.id}')"></div>
-        <div class="list-item-content" style="flex:1">
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px">
-            <div class="list-item-title ${isDone?'completed-text':''}">${escapeHtml(item.text)} <span class="tag">${escapeHtml(cat)}</span></div>
-            <div style="display:flex;align-items:center;gap:8px">
-              <span style="font-size:18px;font-weight:700;color:${barColor}">${displayProgress}%</span>
-            </div>
-          </div>
-          <div class="list-item-meta">${item.date} ${item.deadline?'· 截止 '+item.deadline:''} ${valueDisplay}</div>
-          ${item.note?`<div class="list-item-body" style="color:var(--text-secondary)">📝 ${escapeHtml(item.note)}</div>`:''}
-          <!-- 独立进度条 -->
-          <div style="margin-top:10px">
-            <div class="progress-bar" style="height:10px"><div class="progress-fill" style="width:${displayProgress}%;background:${barColor}"></div></div>
-          </div>
-          ${checkinHistory}
-          <!-- 操作按钮 -->
-          <div style="display:flex;gap:8px;margin-top:10px">
-            ${!isDone ? `<button class="btn btn-sm" onclick="checkinLifeList('${item.id}')">📅 打卡</button>` : '<span style="font-size:12px;color:var(--success);padding:6px 0">✅ 已完成</span>'}
-            <button class="btn btn-sm btn-outline" onclick="editLifeListProgress('${item.id}')">修改进度</button>
-            <button class="btn btn-sm btn-outline" style="margin-left:auto;color:var(--danger);border-color:var(--danger)" onclick="deleteLifeList('${item.id}')">删除</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-}
-function editLifeListProgress(id) {
-  const list = getPageData('lifeList');
-  const item = list.find(x => x.id === id);
-  if (!item) return;
-  const input = prompt(`修改进度(0-100):`, item.progress || 0);
-  if (input === null) return;
-  const val = Math.max(0, Math.min(100, parseInt(input) || 0));
-  item.progress = val;
-  if (val >= 100) item.done = true;
-  else item.done = false;
-  setPageData('lifeList', list);
-  renderPage();
-  toast('进度已更新');
-}
-function addLifeList() {
-  const text = document.getElementById('llText').value.trim();
-  const category = document.getElementById('llCategory').value;
-  const deadline = document.getElementById('llDeadline').value;
-  const note = document.getElementById('llNote').value.trim();
-  const progress = parseInt(document.getElementById('llCurrent').value) || 0;
-  const currentValue = document.getElementById('llCurrentValue').value.trim();
-  const targetValue = document.getElementById('llTargetValue').value.trim();
-  if (!text) { toast('请填写目标'); return; }
-  const list = getPageData('lifeList');
-  const done = progress >= 100;
-  list.push({ id: uid(), text, category, deadline, note, progress, currentValue, targetValue, done, date: todayStr() });
-  setPageData('lifeList', list);
-  renderPage();
-  toast('已添加目标');
-}
-function toggleLifeList(id) {
-  const list = getPageData('lifeList');
-  const item = list.find(x => x.id === id);
-  if (item) {
-    item.done = !item.done;
-    if (item.done) item.progress = 100;
-    else if (item.progress >= 100) item.progress = 90;
-  }
-  setPageData('lifeList', list);
-  renderPage();
-  toast(item.done ? '🎉 恭喜完成一项!' : '已取消完成');
-}
-function deleteLifeList(id) {
-  if (!confirm('确定要删除这个目标吗?删除后无法恢复。')) return;
-  let list = getPageData('lifeList');
-  list = list.filter(x => x.id !== id);
-  setPageData('lifeList', list);
-  renderPage();
-  toast('已删除');
-}
-// 打卡:弹窗输入本次完成的进度增量
-function checkinLifeList(id) {
-  const list = getPageData('lifeList');
-  const item = list.find(x => x.id === id);
-  if (!item) return;
-  const current = item.progress || 0;
-  const input = prompt(`打卡:本次完成了多少?(输入0-100的数字)\n当前进度:${current}%\n例如:存了1w就输入2(代表+2%)`, '');
-  if (input === null) return;
-  const add = parseInt(input) || 0;
-  if (add <= 0) { toast('请输入大于0的数字'); return; }
-  const newProgress = Math.min(100, current + add);
-  item.progress = newProgress;
-  // 记录打卡历史
-  if (!item.checkins) item.checkins = [];
-  item.checkins.push({ date: todayStr(), time: new Date().toTimeString().slice(0,5), add: add, total: newProgress });
-  if (newProgress >= 100) item.done = true;
-  setPageData('lifeList', list);
-  renderPage();
-  if (newProgress >= 100) toast('🎉 恭喜完成!');
-  else toast(`打卡成功!+${add}% → ${newProgress}%`);
-}
-
-// ---------- 3. 选题每日灵感 ----------
+// ---------- 2. 选题每日灵感 ----------
 RENDERERS.inspiration = function() {
   const list = getPageData('inspiration');
   return `
@@ -1962,7 +1413,6 @@ window.addEventListener('beforeinstallprompt', (e) => {
 });
 
 // ==================== 初始化 ====================
-initLifeList();
 renderNav();
 renderPage();
 
