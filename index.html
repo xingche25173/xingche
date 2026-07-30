@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="星澈">
-<meta name="theme-color" content="#FFD60A">
+<meta name="theme-color" content="#2E7D32">
 <title>星澈 · 工作台</title>
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
@@ -527,7 +527,7 @@ input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18p
 
 <script>
 // ==================== 数据层 ====================
-const STORAGE_KEY = 'xingche_workbench_v1';
+const STORAGE_KEY = 'xingche_workbench_v2';  // 升级版本号,强制刷新数据
 
 function loadData() {
   try {
@@ -588,44 +588,62 @@ function initLifeList() {
   setPageData('lifeList', list);
 }
 function getLifeListPresets() {
+  // 距离30岁生日(2027-01-26)还有180天
+  // 根据当前状态设计每日任务,每天打勾即可推进
   return [
-    { text: '存款 50w', category: '财务', deadline: '2027-01-26', note: '已存 27w', progress: 54, currentValue: '27w', targetValue: '50w', done: false, dailyTasks: [
-      { id: uid(), text: '记账,记录今日支出', reward: 1 },
-      { id: uid(), text: '存下至少 500 元', reward: 2 },
+    { text: '存款 50w', category: '财务', deadline: '2027-01-26', note: '当前 20w,需存 30w,每月存 5w', progress: 40, currentValue: '20w', targetValue: '50w', done: false, dailyTasks: [
+      { id: uid(), text: '记账:记录今日每一笔支出', reward: 1 },
+      { id: uid(), text: '今日少花一笔非必要开支(奶茶/外卖等)', reward: 2 },
+      { id: uid(), text: '副业/兼职至少赚 100 元', reward: 3 },
+      { id: uid(), text: '复盘今日收支,转入存款', reward: 2 },
     ]},
-    { text: '月入三万,交社保', category: '事业', deadline: '', note: '', progress: 0, currentValue: '', targetValue: '月入3w', done: false, dailyTasks: [
-      { id: uid(), text: '更新一篇内容/接一个商单', reward: 2 },
-      { id: uid(), text: '复盘今日收入', reward: 1 },
+    { text: '月入三万,交社保', category: '事业', deadline: '2027-01-26', note: '需要涨薪或增加副业收入', progress: 20, currentValue: '', targetValue: '月入3w', done: false, dailyTasks: [
+      { id: uid(), text: '发布1篇内容(小红书/公众号/视频)', reward: 2 },
+      { id: uid(), text: '主动联系1个潜在客户/合作方', reward: 2 },
+      { id: uid(), text: '复盘今日收入来源', reward: 1 },
+      { id: uid(), text: '学习1个搞钱案例/商业分析', reward: 1 },
     ]},
-    { text: '培养输出型爱好,雅思 6.5', category: '学习', deadline: '2027-01-26', note: '', progress: 0, currentValue: '', targetValue: '雅思6.5', done: false, dailyTasks: [
-      { id: uid(), text: '背 50 个单词', reward: 2 },
-      { id: uid(), text: '听力练习 30 分钟', reward: 2 },
-      { id: uid(), text: '口语练习 15 分钟', reward: 1 },
+    { text: '培养输出型爱好,雅思 6.5', category: '学习', deadline: '2027-01-26', note: '从零开始,180天冲刺', progress: 5, currentValue: '0', targetValue: '雅思6.5', done: false, dailyTasks: [
+      { id: uid(), text: '背 40 个雅思核心词汇', reward: 2 },
+      { id: uid(), text: '听力练习 30 分钟(真题/播客)', reward: 2 },
+      { id: uid(), text: '阅读 1 篇英文外刊', reward: 2 },
+      { id: uid(), text: '口语练习 15 分钟(跟读/自言自语)', reward: 2 },
     ]},
-    { text: '保持在 96 斤', category: '健康', deadline: '2027-01-26', note: '', progress: 0, currentValue: '', targetValue: '96斤', done: false, dailyTasks: [
-      { id: uid(), text: '运动 30 分钟', reward: 2 },
-      { id: uid(), text: '控制饮食,不吃高热量', reward: 1 },
-      { id: uid(), text: '称体重记录', reward: 1 },
+    { text: '减到 96 斤', category: '健康', deadline: '2027-01-26', note: '当前 100 斤,需减 4 斤', progress: 20, currentValue: '100斤', targetValue: '96斤', done: false, dailyTasks: [
+      { id: uid(), text: '运动 40 分钟(跑步/跳绳/健身)', reward: 3 },
+      { id: uid(), text: '三餐拍照记录,控制热量', reward: 2 },
+      { id: uid(), text: '喝够 2000ml 水', reward: 1 },
+      { id: uid(), text: '不喝奶茶/含糖饮料', reward: 2 },
+      { id: uid(), text: '称体重并记录', reward: 1 },
     ]},
-    { text: '情绪稳定', category: '健康', deadline: '', note: '', progress: 0, currentValue: '', targetValue: '', done: false, dailyTasks: [
-      { id: uid(), text: '冥想/深呼吸 5 分钟', reward: 2 },
-      { id: uid(), text: '写感恩日记 3 件事', reward: 1 },
+    { text: '情绪稳定', category: '健康', deadline: '2027-01-26', note: '练习情绪管理', progress: 10, currentValue: '不稳定', targetValue: '情绪稳定', done: false, dailyTasks: [
+      { id: uid(), text: '冥想/深呼吸 10 分钟', reward: 2 },
+      { id: uid(), text: '写情绪日记:今天什么触发了情绪', reward: 2 },
+      { id: uid(), text: '练习「暂停3秒」再回应', reward: 1 },
+      { id: uid(), text: '找到1件感恩的事', reward: 1 },
     ]},
-    { text: '晚上 11 点睡觉', category: '健康', deadline: '', note: '', progress: 0, currentValue: '', targetValue: '23:00', done: false, dailyTasks: [
-      { id: uid(), text: '10:30 前放下手机', reward: 2 },
-      { id: uid(), text: '完成洗漱护肤', reward: 1 },
+    { text: '晚上 11 点睡觉', category: '健康', deadline: '2027-01-26', note: '当前熬夜,逐步调整', progress: 10, currentValue: '熬夜', targetValue: '23:00睡', done: false, dailyTasks: [
+      { id: uid(), text: '22:00 前洗漱完毕', reward: 2 },
+      { id: uid(), text: '22:30 放下手机', reward: 3 },
+      { id: uid(), text: '23:00 闭眼睡觉', reward: 3 },
+      { id: uid(), text: '记录昨晚入睡时间', reward: 1 },
     ]},
-    { text: '穿有气质的衣服', category: '形象', deadline: '', note: '', progress: 0, currentValue: '', targetValue: '', done: false, dailyTasks: [
-      { id: uid(), text: '提前搭配明日穿搭', reward: 1 },
-      { id: uid(), text: '整理衣柜,淘汰旧衣', reward: 1 },
+    { text: '穿有气质的衣服', category: '形象', deadline: '2027-01-26', note: '从零学穿搭', progress: 5, currentValue: '不会穿搭', targetValue: '有气质', done: false, dailyTasks: [
+      { id: uid(), text: '看3套穿搭灵感(小红书/ins)', reward: 1 },
+      { id: uid(), text: '提前搭配明日穿搭', reward: 2 },
+      { id: uid(), text: '整理衣柜,淘汰1件不穿的衣服', reward: 1 },
+      { id: uid(), text: '研究自己的身型/色彩风格', reward: 2 },
     ]},
-    { text: '妆容精致,会画眼妆', category: '形象', deadline: '', note: '', progress: 0, currentValue: '', targetValue: '', done: false, dailyTasks: [
-      { id: uid(), text: '练习眼妆 15 分钟', reward: 2 },
-      { id: uid(), text: '卸妆护肤', reward: 1 },
+    { text: '妆容精致,会画眼妆', category: '形象', deadline: '2027-01-26', note: '从零学化妆', progress: 5, currentValue: '不会', targetValue: '精致妆容', done: false, dailyTasks: [
+      { id: uid(), text: '练习底妆(粉底+遮瑕)', reward: 2 },
+      { id: uid(), text: '练习眼妆(眼影/眼线/睫毛)', reward: 3 },
+      { id: uid(), text: '卸妆+护肤步骤', reward: 1 },
+      { id: uid(), text: '看1个美妆教程视频', reward: 1 },
     ]},
-    { text: '找个喜欢的人谈恋爱', category: '情感', deadline: '2027-01-26', note: '', progress: 0, currentValue: '', targetValue: '', done: false, dailyTasks: [
-      { id: uid(), text: '社交/认识新朋友', reward: 1 },
-      { id: uid(), text: '主动和感兴趣的人聊天', reward: 2 },
+    { text: '找个喜欢的人谈恋爱', category: '情感', deadline: '2027-01-26', note: '主动社交', progress: 5, currentValue: '单身', targetValue: '找到对的人', done: false, dailyTasks: [
+      { id: uid(), text: '主动和1个人聊天/社交', reward: 2 },
+      { id: uid(), text: '参加1次社交活动/聚会', reward: 3 },
+      { id: uid(), text: '提升自己:今天做了什么让自己更有魅力', reward: 1 },
     ]},
     { text: '出国玩', category: '体验', deadline: '', note: '✅ 已去了泰国', progress: 100, currentValue: '泰国', targetValue: '', done: true, dailyTasks: [] },
     { text: '学会游泳', category: '健康', deadline: '', note: '', progress: 100, currentValue: '', targetValue: '', done: true, dailyTasks: [] },
